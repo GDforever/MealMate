@@ -1,0 +1,50 @@
+spring:
+  application:
+    name: MealMate
+  datasource:
+    url: jdbc:postgresql://localhost:5432/mealmate
+    username: postgres
+    password: postgres
+    driver-class-name: org.postgresql.Driver
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: true
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: true
+  jackson:
+    default-property-inclusion: non_null
+
+server:
+  port: 8080
+
+jwt:
+  secret: ${JWT_SECRET:default-dev-secret-key-at-least-256-bits-long-for-hs256-please-change-in-production}
+  expiration: 604800000  # 7 days in milliseconds
+
+springdoc:
+  api-docs:
+    path: /api-docs
+  swagger-ui:
+    path: /swagger-ui.html
+    enabled: true
+
+# Reserved for Phase 2
+amap:
+  api-key: ${AMAP_API_KEY:your-amap-key}
+  base-url: https://restapi.amap.com/v3
+
+spring.ai:
+  openai:
+    base-url: ${AI_BASE_URL:https://api.deepseek.com}
+    api-key: ${AI_API_KEY:your-api-key}
+    chat:
+      options:
+        model: deepseek-chat
+
+logging:
+  level:
+    com.gd.mealmate: DEBUG
+    org.springframework.security: DEBUG
