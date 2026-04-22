@@ -1,6 +1,7 @@
 package com.gd.mealmate.dto.response;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
+import com.gd.mealmate.exception.ErrorCode;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
