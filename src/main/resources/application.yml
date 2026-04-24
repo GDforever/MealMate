@@ -2,24 +2,28 @@ spring:
   application:
     name: MealMate
   datasource:
-    url: jdbc:postgresql://localhost:5432/mealmate
-    username: postgres
-    password: postgres
-    driver-class-name: org.postgresql.Driver
+    url: jdbc:h2:mem:mealmate;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: sa
+    password:
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
   jpa:
     hibernate:
       ddl-auto: update
     show-sql: true
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
+        dialect: org.hibernate.dialect.H2Dialect
         format_sql: true
   jackson:
     default-property-inclusion: non_null
   ai:
     openai:
-      base-url: ${AI_BASE_URL:https://api.deepseek.com}
-      api-key: ${AI_API_KEY:your-api-key}
+      base-url: https://api.deepseek.com
+      api-key: ***REMOVED***
       chat:
         options:
           model: deepseek-chat
@@ -46,7 +50,7 @@ logging:
 
 # Amap (高德地图) Configuration
 amap:
-  api-key: ${AMAP_API_KEY:your-amap-key}
+  api-key: ***REMOVED***
   base-url: https://restapi.amap.com/v3
   sync:
     enabled: true
