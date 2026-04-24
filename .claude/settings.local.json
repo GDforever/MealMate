@@ -9,7 +9,15 @@
       "Bash(./mvnw test *)",
       "Bash(find *)",
       "Bash(git push *)",
-      "Bash(./mvnw spring-boot:run *)"
+      "Bash(./mvnw spring-boot:run *)",
+      "Bash(curl -s http://localhost:8080/actuator/health)",
+      "Bash(java -version)",
+      "Bash(cmd.exe *)",
+      "Read(//c/workplace/**)",
+      "Bash(powershell -Command \"Invoke-WebRequest -Uri 'https://repo1.maven.org/maven2/com/madgag/bfg/1.14.0/bfg-1.14.0.jar' -OutFile 'bfg.jar'\")",
+      "Bash(java *)",
+      "Bash(git reflog *)",
+      "Bash(git gc *)"
     ]
   }
 }

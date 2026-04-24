@@ -46,7 +46,7 @@ public class MealRecord {
 
     private Integer userRating;
 
-    @Column(columnDefinition = "jsonb")
+    @Column(length = 1000)
     private String tags;
 
     @CreationTimestamp

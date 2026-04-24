@@ -31,7 +31,7 @@ public class User {
     @Column(unique = true, length = 100)
     private String email;
 
-    @Column(columnDefinition = "jsonb")
+    @Column(length = 1000)
     private String tastePreferences;
 
     @CreationTimestamp
