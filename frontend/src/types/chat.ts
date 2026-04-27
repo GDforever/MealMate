@@ -24,6 +24,7 @@ export interface ChatSessionDto {
   createdAt: string
   updatedAt: string
   messageCount?: number
+  messages?: ChatMessage[]
 }
 
 export interface ChatMessageDto {
