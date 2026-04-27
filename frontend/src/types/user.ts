@@ -2,8 +2,7 @@ export interface User {
   id: number
   username: string
   email: string
-  nickname?: string
-  avatarUrl?: string
+  tastePreferences: string[]
   createdAt: string
   updatedAt: string
 }
@@ -26,6 +25,5 @@ export interface AuthResponse {
 }
 
 export interface UpdatePreferencesRequest {
-  nickname?: string
-  avatarUrl?: string
+  tastePreferences: string[]
 }
