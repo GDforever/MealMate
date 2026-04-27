@@ -37,5 +37,7 @@ export interface ChatMessageDto {
 export interface SSEMessage {
   type: 'message' | 'done' | 'error'
   content?: string
+  delta?: string
   error?: string
+  sessionId?: number
 }
