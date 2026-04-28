@@ -18,6 +18,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 
 @RestController
@@ -42,14 +43,16 @@ public class MealRecordController {
     @Operation(summary = "Get meal records", description = "Returns paginated list of user's meal records with optional filters")
     public ApiResponse<Page<MealRecordDto>> getMealRecords(
             @AuthenticationPrincipal Long userId,
-            @Parameter(description = "Start date for filtering (ISO format)")
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime startDate,
-            @Parameter(description = "End date for filtering (ISO format)")
-            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime endDate,
+            @Parameter(description = "Start date for filtering (yyyy-MM-dd)")
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @Parameter(description = "End date for filtering (yyyy-MM-dd)")
+            @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate,
             @Parameter(description = "Meal type filter")
             @RequestParam(required = false) MealType mealType,
             @PageableDefault(size = 20) Pageable pageable) {
-        Page<MealRecordDto> mealRecords = mealRecordService.getMealRecords(userId, startDate, endDate, mealType, pageable);
+        LocalDateTime startDateTime = startDate != null ? startDate.atStartOfDay() : null;
+        LocalDateTime endDateTime = endDate != null ? endDate.atTime(23, 59, 59) : null;
+        Page<MealRecordDto> mealRecords = mealRecordService.getMealRecords(userId, startDateTime, endDateTime, mealType, pageable);
         return ApiResponse.success(mealRecords);
     }
 

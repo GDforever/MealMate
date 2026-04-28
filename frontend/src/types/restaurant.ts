@@ -2,11 +2,12 @@ export interface Restaurant {
   id: number
   name: string
   address: string
-  phone?: string
   latitude: number
   longitude: number
-  category?: string
+  cuisineType?: string
+  avgPrice?: number
   rating?: number
+  source?: string
   distance?: number
   createdAt: string
   updatedAt: string
@@ -17,7 +18,7 @@ export interface RestaurantSearchParams {
   latitude?: number
   longitude?: number
   radius?: number
-  category?: string
+  cuisineType?: string
 }
 
 export interface Location {

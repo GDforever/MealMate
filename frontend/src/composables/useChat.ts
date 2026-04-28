@@ -15,36 +15,49 @@ export function useChat() {
   const { isConnected, connect, disconnect } = useSSE()
 
   const loadSessions = async () => {
+    chatStore.setLoading(false)
+    chatStore.streamingContent = ''
     await chatStore.fetchSessions()
   }
 
   const createNewSession = async () => {
+    chatStore.setLoading(false)
     await chatStore.createSession()
   }
 
   const selectSession = async (sessionId: number) => {
+    chatStore.setLoading(false)
     chatStore.setCurrentSession(sessionId)
+    await chatStore.fetchSessionMessages(sessionId)
   }
 
   const sendMessage = async (message: string) => {
-    const responsePromise = chatApi.sendMessage(message, chatStore.currentSessionId)
+    chatStore.addUserMessage(message)
+    chatStore.setLoading(true)
 
-    await connect(responsePromise, {
-      onOpen: () => {
-        chatStore.setLoading(true)
-      },
+    const responsePromise = Promise.resolve(chatApi.sendMessage(message, chatStore.currentSessionId))
+
+    // Fire-and-forget: connect manages its own lifecycle via callbacks.
+    // Do NOT await — if the SSE stream never closes, await would block forever.
+    connect(responsePromise, {
       onMessage: (delta) => {
         chatStore.setStreamingContent(delta)
       },
       onDone: async (data) => {
-        chatStore.finalizeMessage(data.sessionId)
+        chatStore.finalizeMessage(data?.sessionId || chatStore.currentSessionId || -1)
         chatStore.setLoading(false)
-        await chatStore.fetchSessions()
+        try {
+          await chatStore.fetchSessions()
+        } catch (e) {
+          console.error('Failed to refresh sessions:', e)
+        }
       },
       onError: (error) => {
         console.error('SSE error:', error)
         chatStore.setLoading(false)
       }
+    }).catch(() => {
+      chatStore.setLoading(false)
     })
   }
 

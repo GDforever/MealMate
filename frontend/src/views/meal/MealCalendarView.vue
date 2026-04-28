@@ -170,7 +170,8 @@ const loadMeals = async () => {
     const year = currentMonth.value.getFullYear()
     const month = currentMonth.value.getMonth() + 1
     const startDate = `${year}-${String(month).padStart(2, '0')}-01`
-    const endDate = `${year}-${String(month).padStart(2, '0')}-31`
+    const lastDay = new Date(year, currentMonth.value.getMonth() + 1, 0).getDate()
+    const endDate = `${year}-${String(month).padStart(2, '0')}-${String(lastDay).padStart(2, '0')}`
 
     const response = await mealApi.getRecords({
       page: 0,

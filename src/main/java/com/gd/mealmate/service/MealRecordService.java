@@ -16,7 +16,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import jakarta.persistence.criteria.Predicate;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -39,8 +42,21 @@ public class MealRecordService {
     }
 
     public Page<MealRecordDto> getMealRecords(Long userId, LocalDateTime startDate, LocalDateTime endDate, MealType mealType, Pageable pageable) {
-        return mealRecordRepository.findByFilters(userId, startDate, endDate, mealType, pageable)
-                .map(mealRecordMapper::toDto);
+        return mealRecordRepository.findAll((root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            predicates.add(cb.equal(root.get("user").get("id"), userId));
+            if (startDate != null) {
+                predicates.add(cb.greaterThanOrEqualTo(root.get("recordedAt"), startDate));
+            }
+            if (endDate != null) {
+                predicates.add(cb.lessThanOrEqualTo(root.get("recordedAt"), endDate));
+            }
+            if (mealType != null) {
+                predicates.add(cb.equal(root.get("mealType"), mealType));
+            }
+            query.orderBy(cb.desc(root.get("recordedAt")));
+            return cb.and(predicates.toArray(new Predicate[0]));
+        }, pageable).map(mealRecordMapper::toDto);
     }
 
     public MealRecordDto getMealRecordById(Long userId, Long recordId) {

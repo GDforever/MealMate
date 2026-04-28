@@ -16,7 +16,8 @@ export const useRestaurantStore = defineStore('restaurant', () => {
   const searchNearby = async (params?: Partial<RestaurantSearchParams>) => {
     const finalParams = { ...searchParams.value, ...params }
     searchParams.value = finalParams
-    list.value = await restaurantApi.searchNearby(finalParams)
+    const page = await restaurantApi.searchNearby(finalParams)
+    list.value = page.content || []
   }
 
   const fetchDetail = async (id: number) => {
@@ -36,7 +37,7 @@ export const useRestaurantStore = defineStore('restaurant', () => {
             latitude: position.coords.latitude,
             longitude: position.coords.longitude
           }
-          userLocation.value = location
+          setUserLocation(location)
           resolve(location)
         },
         (error) => {

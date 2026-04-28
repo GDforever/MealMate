@@ -17,7 +17,22 @@
       "Bash(powershell -Command \"Invoke-WebRequest -Uri 'https://repo1.maven.org/maven2/com/madgag/bfg/1.14.0/bfg-1.14.0.jar' -OutFile 'bfg.jar'\")",
       "Bash(java *)",
       "Bash(git reflog *)",
-      "Bash(git gc *)"
+      "Bash(git gc *)",
+      "Bash(npm install *)",
+      "Bash(npx vue-tsc *)",
+      "Bash(npm cache *)",
+      "Bash(npx tsc *)",
+      "Bash(npm run *)",
+      "Bash(node -e ' *)",
+      "Bash(npm list *)",
+      "Bash(npx sass *)",
+      "Bash(node -e \"console.log\\('Testing imports...'\\); const ts = require\\('typescript'\\); const code = require\\('fs'\\).readFileSync\\('src/api/request.ts', 'utf8'\\); console.log\\('File read successfully'\\);\")",
+      "Bash(node -e \"console.log\\('Syntax check passed'\\)\")",
+      "Bash(timeout 10 npx vite build --mode development)",
+      "Bash(npx vite *)",
+      "Bash(curl -s http://localhost:5173)",
+      "Bash(curl *)",
+      "Bash(pkill -f \"vite\")"
     ]
   }
 }

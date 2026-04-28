@@ -73,14 +73,20 @@ public class ChatService {
                         fullResponse.append(content);
                         sink.next(content);
                     }
-                }, null, () -> {
-                    // On complete, save assistant message
-                    if (fullResponse.length() > 0) {
-                        ChatMessage assistantMsg = new ChatMessage();
-                        assistantMsg.setSession(session);
-                        assistantMsg.setRole(ChatMessageRole.ASSISTANT);
-                        assistantMsg.setContent(fullResponse.toString());
-                        messageRepository.save(assistantMsg);
+                }, error -> {
+                    log.error("Chat stream error: {}", error.getMessage(), error);
+                    sink.complete();
+                }, () -> {
+                    try {
+                        if (fullResponse.length() > 0) {
+                            ChatMessage assistantMsg = new ChatMessage();
+                            assistantMsg.setSession(session);
+                            assistantMsg.setRole(ChatMessageRole.ASSISTANT);
+                            assistantMsg.setContent(fullResponse.toString());
+                            messageRepository.save(assistantMsg);
+                        }
+                    } catch (Exception e) {
+                        log.error("Failed to save assistant message: {}", e.getMessage(), e);
                     }
                     sink.complete();
                 });

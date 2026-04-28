@@ -22,10 +22,10 @@
           :content="message.content"
           :created-at="message.createdAt"
         />
-        <div v-if="isLoading || streamingContent" class="streaming-message">
+        <div v-if="isLoading && currentMessages.length === 0" class="streaming-message">
           <ChatMessage
             role="ASSISTANT"
-            :content="streamingContent || '正在思考...'"
+            content="正在思考..."
           />
         </div>
       </div>
