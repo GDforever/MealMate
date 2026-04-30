@@ -11,6 +11,16 @@
         <span class="message-time">{{ formattedTime }}</span>
       </div>
       <div class="message-text" v-html="renderedContent"></div>
+      <div v-if="options && options.length > 0" class="message-options">
+        <div
+          v-for="(option, index) in options"
+          :key="index"
+          class="option-btn"
+          @click="$emit('selectOption', option)"
+        >
+          {{ option }}
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -25,6 +35,11 @@ const props = defineProps<{
   role: 'USER' | 'ASSISTANT' | 'SYSTEM'
   content: string
   createdAt?: string
+  options?: string[]
+}>()
+
+defineEmits<{
+  selectOption: [option: string]
 }>()
 
 const md = new MarkdownIt()
@@ -111,6 +126,34 @@ const renderedContent = computed(() => {
     border-radius: 8px;
     overflow-x: auto;
     margin: 8px 0;
+  }
+}
+
+.message-options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.option-btn {
+  padding: 6px 16px;
+  background: #fff;
+  border: 1px solid #409eff;
+  border-radius: 18px;
+  color: #409eff;
+  font-size: 13px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+
+  &:hover {
+    background: #409eff;
+    color: #fff;
+  }
+
+  &:active {
+    transform: scale(0.96);
   }
 }
 

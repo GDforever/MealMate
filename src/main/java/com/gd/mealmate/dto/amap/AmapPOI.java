@@ -1,5 +1,6 @@
 package com.gd.mealmate.dto.amap;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -13,8 +14,23 @@ public class AmapPOI {
     private String name;
     private String address;
     private String tel;
-    private Double locationLat;  // parsed from "lat,lng"
-    private Double locationLng;
+    private String location;  // "lng,lat" format returned by AMap
     private String type;
-    private Integer distance;
+    private String distance;
+
+    @JsonIgnore
+    public Double getLocationLat() {
+        if (location == null || !location.contains(",")) {
+            return null;
+        }
+        return Double.parseDouble(location.split(",")[1]);
+    }
+
+    @JsonIgnore
+    public Double getLocationLng() {
+        if (location == null || !location.contains(",")) {
+            return null;
+        }
+        return Double.parseDouble(location.split(",")[0]);
+    }
 }

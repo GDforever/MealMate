@@ -4,7 +4,6 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gd.mealmate.dto.response.MealRecordDto;
 import com.gd.mealmate.function.dto.GetMealHistoryRequest;
-import com.gd.mealmate.security.UserPrincipal;
 import com.gd.mealmate.service.MealRecordService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -12,7 +11,6 @@ import org.springframework.context.annotation.Description;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import java.time.LocalDateTime;
@@ -30,8 +28,7 @@ public class GetMealHistoryFunction implements Function<GetMealHistoryRequest, S
 
     @Override
     public String apply(GetMealHistoryRequest request) {
-        UserPrincipal principal = (UserPrincipal) SecurityContextHolder.getContext()
-                .getAuthentication().getPrincipal();
+        Long userId = request.getUserId();
 
         LocalDateTime startDateTime = request.getStartDate() != null
                 ? request.getStartDate().atStartOfDay()
@@ -44,7 +41,7 @@ public class GetMealHistoryFunction implements Function<GetMealHistoryRequest, S
         Pageable pageable = PageRequest.of(0, pageSize);
 
         Page<MealRecordDto> records = mealRecordService.getMealRecords(
-                principal.getUserId(),
+                userId,
                 startDateTime,
                 endDateTime,
                 null,

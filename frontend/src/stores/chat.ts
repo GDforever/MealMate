@@ -97,6 +97,15 @@ export const useChatStore = defineStore('chat', () => {
     appendAssistantMessage(delta)
   }
 
+  const setMessageOptions = (items: string[]) => {
+    const sessionMessages = messages.value.get(currentSessionId.value || -1) || []
+    const lastMessage = sessionMessages[sessionMessages.length - 1]
+    if (lastMessage && lastMessage.role === 'ASSISTANT') {
+      lastMessage.options = items
+      messages.value.set(currentSessionId.value || -1, [...sessionMessages])
+    }
+  }
+
   const deleteSession = async (sessionId: number) => {
     await chatApi.deleteSession(sessionId)
     sessions.value = sessions.value.filter((s) => s.id !== sessionId)
@@ -105,6 +114,15 @@ export const useChatStore = defineStore('chat', () => {
     if (currentSessionId.value === sessionId) {
       currentSessionId.value = sessions.value[0]?.id || null
     }
+  }
+
+  const migrateMessages = (newSessionId: number) => {
+    const tempMessages = messages.value.get(-1)
+    if (tempMessages && tempMessages.length > 0) {
+      messages.value.delete(-1)
+      messages.value.set(newSessionId, tempMessages)
+    }
+    currentSessionId.value = newSessionId
   }
 
   return {
@@ -124,6 +142,8 @@ export const useChatStore = defineStore('chat', () => {
     finalizeMessage,
     setLoading,
     setStreamingContent,
-    deleteSession
+    setMessageOptions,
+    deleteSession,
+    migrateMessages
   }
 })

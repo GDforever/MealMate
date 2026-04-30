@@ -15,6 +15,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor
 @AllArgsConstructor
 public class MealRecordRequest {
+    private Long userId;
     @NotNull(message = "用餐类型不能为空")
     private MealType mealType;
     @NotBlank(message = "食物名称不能为空")

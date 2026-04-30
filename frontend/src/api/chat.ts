@@ -2,10 +2,9 @@ import request from './request'
 import type { ChatRequest, ChatSession, ChatMessage, ChatSessionDto, ChatMessageDto, SSEMessage } from '@/types'
 
 export const chatApi = {
-  sendMessage(message: string, sessionId?: number): Response {
+  sendMessage(message: string, sessionId?: number | null, location?: { latitude: number; longitude: number }): Response {
     const token = localStorage.getItem('token')
-    const url = sessionId ? `/chat?sessionId=${sessionId}` : '/chat'
-    const fullUrl = `${request.defaults.baseURL}${url}`
+    const fullUrl = `${request.defaults.baseURL}/chat`
 
     return fetch(fullUrl, {
       method: 'POST',
@@ -13,7 +12,11 @@ export const chatApi = {
         'Content-Type': 'application/json',
         'Authorization': `Bearer ${token}`
       },
-      body: JSON.stringify({ message })
+      body: JSON.stringify({
+        message,
+        sessionId: sessionId || undefined,
+        ...(location ? { latitude: location.latitude, longitude: location.longitude } : {})
+      })
     })
   },
 

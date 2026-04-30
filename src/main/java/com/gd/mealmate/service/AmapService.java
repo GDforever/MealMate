@@ -13,6 +13,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.RestTemplate;
 
+import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 
 @Service
@@ -42,9 +44,10 @@ public class AmapService {
     private boolean syncEnabled;
 
     public AmapPOIResponse searchPOI(String keywords, double lat, double lng, int radius) {
+        String encodedKeywords = URLEncoder.encode(keywords, StandardCharsets.UTF_8);
         String url = String.format(
-                "%s/place/around?key=%s&location=%f,%f&radius=%d&keywords=%s",
-                baseUrl, apiKey, lng, lat, radius, keywords
+                "%s/place/around?key=%s&location=%f,%f&radius=%d&keywords=%s&output=json",
+                baseUrl, apiKey, lng, lat, radius, encodedKeywords
         );
 
         try {
@@ -70,7 +73,7 @@ public class AmapService {
             try {
                 AmapPOIResponse response = searchPOI(keyword, centerLatitude, centerLongitude, syncRadius);
 
-                if (response != null && "1".equals(String.valueOf(response.getStatus()))) {
+                if (response != null && response.isSuccess()) {
                     savePOIData(response);
                     log.info("Synced {} POIs for keyword: {}",
                             response.getPois() != null ? response.getPois().size() : 0, keyword);

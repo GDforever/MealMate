@@ -4,12 +4,10 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.gd.mealmate.dto.request.MealRecordRequest;
 import com.gd.mealmate.dto.response.MealRecordDto;
-import com.gd.mealmate.security.UserPrincipal;
 import com.gd.mealmate.service.MealRecordService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Description;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import java.util.function.Function;
@@ -25,11 +23,8 @@ public class CreateMealRecordFunction implements Function<MealRecordRequest, Str
 
     @Override
     public String apply(MealRecordRequest request) {
-        UserPrincipal principal = (UserPrincipal) SecurityContextHolder.getContext()
-                .getAuthentication().getPrincipal();
-
         try {
-            MealRecordDto record = mealRecordService.createMealRecord(principal.getUserId(), request);
+            MealRecordDto record = mealRecordService.createMealRecord(request.getUserId(), request);
             return objectMapper.writeValueAsString(record);
         } catch (JsonProcessingException e) {
             log.error("Failed to serialize response: {}", e.getMessage());

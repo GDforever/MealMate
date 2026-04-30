@@ -16,4 +16,7 @@ public class ChatRequest {
     private String message;
 
     private Long sessionId;  // null for new session
+
+    private Double latitude;
+    private Double longitude;
 }

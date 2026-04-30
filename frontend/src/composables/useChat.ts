@@ -2,6 +2,7 @@ import { computed } from 'vue'
 import { useChatStore } from '@/stores/chat'
 import { useSSE } from './useSSE'
 import { chatApi } from '@/api/chat'
+import { useRestaurantStore } from '@/stores/restaurant'
 
 export function useChat() {
   const chatStore = useChatStore()
@@ -35,13 +36,32 @@ export function useChat() {
     chatStore.addUserMessage(message)
     chatStore.setLoading(true)
 
-    const responsePromise = Promise.resolve(chatApi.sendMessage(message, chatStore.currentSessionId))
+    // Try to get user location
+    let location: { latitude: number; longitude: number } | undefined
+    try {
+      const restaurantStore = useRestaurantStore()
+      if (restaurantStore.userLocation) {
+        location = restaurantStore.userLocation
+      } else {
+        location = await restaurantStore.getCurrentLocation()
+      }
+    } catch {
+      // Location not available, continue without it
+    }
+
+    const responsePromise = Promise.resolve(chatApi.sendMessage(message, chatStore.currentSessionId, location))
 
     // Fire-and-forget: connect manages its own lifecycle via callbacks.
     // Do NOT await — if the SSE stream never closes, await would block forever.
     connect(responsePromise, {
+      onSession: (sessionId) => {
+        chatStore.migrateMessages(sessionId)
+      },
       onMessage: (delta) => {
         chatStore.setStreamingContent(delta)
+      },
+      onOptions: (items) => {
+        chatStore.setMessageOptions(items)
       },
       onDone: async (data) => {
         chatStore.finalizeMessage(data?.sessionId || chatStore.currentSessionId || -1)

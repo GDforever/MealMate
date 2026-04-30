@@ -11,11 +11,14 @@ export interface ChatMessage {
   role: 'USER' | 'ASSISTANT' | 'SYSTEM'
   content: string
   createdAt: string
+  options?: string[]
 }
 
 export interface ChatRequest {
   message: string
   sessionId: number
+  latitude?: number
+  longitude?: number
 }
 
 export interface ChatSessionDto {
@@ -36,9 +39,10 @@ export interface ChatMessageDto {
 }
 
 export interface SSEMessage {
-  type: 'message' | 'done' | 'error'
+  type: 'text' | 'options' | 'message' | 'done' | 'error'
   content?: string
   delta?: string
+  items?: string[]
   error?: string
   sessionId?: number
 }

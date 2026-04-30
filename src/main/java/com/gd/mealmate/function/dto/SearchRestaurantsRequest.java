@@ -12,4 +12,5 @@ public class SearchRestaurantsRequest {
     private Double longitude;
     private Integer radius;
     private String cuisineType;
+    private String keywords;
 }

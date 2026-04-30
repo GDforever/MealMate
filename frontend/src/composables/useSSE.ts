@@ -4,7 +4,9 @@ import type { SSEMessage } from '@/types'
 
 export interface SSEHandlers {
   onOpen?: () => void
+  onSession?: (sessionId: number) => void
   onMessage?: (delta: string) => void
+  onOptions?: (items: string[]) => void
   onDone?: (data: any) => void
   onError?: (error: any) => void
 }
@@ -107,8 +109,17 @@ export function useSSE() {
             const data: SSEMessage = JSON.parse(dataStr)
 
             switch (data.type) {
+              case 'session':
+                handlers.onSession?.(data.sessionId)
+                break
+              case 'text':
+                handlers.onMessage?.(data.content || '')
+                break
+              case 'options':
+                handlers.onOptions?.(data.items || [])
+                break
               case 'message':
-                handlers.onMessage?.(data.delta || '')
+                handlers.onMessage?.(data.delta || data.content || '')
                 break
               case 'done':
                 handlers.onDone?.(data)

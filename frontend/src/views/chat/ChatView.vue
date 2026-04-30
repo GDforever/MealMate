@@ -21,6 +21,8 @@
           :role="message.role"
           :content="message.content"
           :created-at="message.createdAt"
+          :options="message.options"
+          @select-option="handleSelectOption"
         />
         <div v-if="isLoading && currentMessages.length === 0" class="streaming-message">
           <ChatMessage
@@ -92,6 +94,10 @@ const handleDeleteSession = async (sessionId: number) => {
 
 const handleSendMessage = async (message: string) => {
   await sendMessage(message)
+}
+
+const handleSelectOption = async (option: string) => {
+  await sendMessage(option)
 }
 
 const scrollToBottom = () => {

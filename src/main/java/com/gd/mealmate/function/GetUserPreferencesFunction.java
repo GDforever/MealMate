@@ -6,11 +6,9 @@ import com.gd.mealmate.function.dto.GetUserPreferencesRequest;
 import com.gd.mealmate.function.dto.GetUserPreferencesResponse;
 import com.gd.mealmate.model.entity.User;
 import com.gd.mealmate.repository.UserRepository;
-import com.gd.mealmate.security.UserPrincipal;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Description;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -27,17 +25,19 @@ public class GetUserPreferencesFunction implements Function<GetUserPreferencesRe
 
     @Override
     public String apply(GetUserPreferencesRequest request) {
-        UserPrincipal principal = (UserPrincipal) SecurityContextHolder.getContext()
-                .getAuthentication().getPrincipal();
-
-        User user = userRepository.findById(principal.getUserId())
+        User user = userRepository.findById(request.getUserId())
                 .orElseThrow(() -> new com.gd.mealmate.exception.BusinessException(
                         com.gd.mealmate.exception.ErrorCode.RESOURCE_NOT_FOUND));
+
+        String prefs = user.getTastePreferences();
+        List<String> preferences = (prefs != null && !prefs.isBlank())
+                ? List.of(prefs.split("[,，;；]+"))
+                : List.of();
 
         GetUserPreferencesResponse response = new GetUserPreferencesResponse(
                 user.getId(),
                 user.getUsername(),
-                List.of()  // Simplified for MVP
+                preferences
         );
 
         try {

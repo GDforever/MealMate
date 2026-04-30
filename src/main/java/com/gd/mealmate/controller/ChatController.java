@@ -28,7 +28,8 @@ public class ChatController {
     @PostMapping(produces = MediaType.TEXT_EVENT_STREAM_VALUE)
     @Operation(summary = "发送消息并流式返回AI回复")
     public Flux<String> chat(@Valid @RequestBody ChatRequest request) {
-        return chatService.chat(request.getMessage(), request.getSessionId());
+        return chatService.chat(request.getMessage(), request.getSessionId(),
+                request.getLatitude(), request.getLongitude());
     }
 
     @GetMapping("/sessions")
