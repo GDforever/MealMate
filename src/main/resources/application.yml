@@ -62,3 +62,14 @@ chat:
     max-messages: 50
   title:
     max-length: 20
+
+# Knowledge Base Configuration
+app:
+  upload:
+    dir: ${UPLOAD_DIR:./uploads}
+  knowledge:
+    chunk-size: 500
+    chunk-overlap: 50
+    top-k: 5
+    similarity-threshold: 0.7
+    embedding-dimension: 1024

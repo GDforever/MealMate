@@ -18,7 +18,15 @@ public enum ErrorCode {
 
     // Chat errors (40xxx)
     INVALID_CHAT_SESSION(40003, "无效的会话ID"),
-    MESSAGE_TOO_LONG(40004, "消息内容过长");
+    MESSAGE_TOO_LONG(40004, "消息内容过长"),
+
+    // Knowledge Base errors (40xxx)
+    KNOWLEDGE_BASE_NOT_FOUND(40501, "知识库不存在"),
+    KNOWLEDGE_DOCUMENT_NOT_FOUND(40502, "文档不存在"),
+    KNOWLEDGE_BASE_ACCESS_DENIED(40503, "无权访问该知识库"),
+    UNSUPPORTED_FILE_TYPE(40504, "不支持的文件类型"),
+    FILE_PARSE_ERROR(40505, "文件解析失败"),
+    EMBEDDING_ERROR(50004, "向量嵌入生成失败");
 
     private final int code;
     private final String message;
