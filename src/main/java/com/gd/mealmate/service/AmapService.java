@@ -50,10 +50,24 @@ public class AmapService {
                 baseUrl, apiKey, lng, lat, radius, encodedKeywords
         );
 
+        // Log URL with masked API key for security
+        String maskedUrl = url.replace(apiKey, apiKey.substring(0, Math.min(6, apiKey.length())) + "***");
+        log.info("[高德API] 请求URL: {}", maskedUrl);
+        log.info("[高德API] 参数: keywords={}, lat={}, lng={}, radius={}米", keywords, lat, lng, radius);
+
         try {
-            return restTemplate.getForObject(url, AmapPOIResponse.class);
+            AmapPOIResponse response = restTemplate.getForObject(url, AmapPOIResponse.class);
+            if (response != null) {
+                log.info("[高德API] 响应: status={}, info={}, infocode={}, count={}, pois数量={}",
+                        response.getStatus(), response.getInfo(), response.getInfocode(),
+                        response.getCount(),
+                        response.getPois() != null ? response.getPois().size() : 0);
+            } else {
+                log.warn("[高德API] 响应为null!");
+            }
+            return response;
         } catch (Exception e) {
-            log.error("Amap API call failed: {}", e.getMessage());
+            log.error("[高德API] 调用失败: {}", e.getMessage(), e);
             throw new BusinessException(ErrorCode.AMAP_API_ERROR);
         }
     }
@@ -88,24 +102,42 @@ public class AmapService {
 
     public void savePOIData(AmapPOIResponse response) {
         if (response.getPois() == null) {
+            log.warn("[高德API] savePOIData: pois为null，跳过保存");
             return;
         }
 
-        for (AmapPOI poi : response.getPois()) {
-            if (restaurantRepository.findByExternalId(poi.getId()).isEmpty()) {
-                Restaurant restaurant = new Restaurant();
-                restaurant.setName(poi.getName());
-                restaurant.setAddress(poi.getAddress());
-                restaurant.setLatitude(poi.getLocationLat());
-                restaurant.setLongitude(poi.getLocationLng());
-                restaurant.setSource("AMAP");
-                restaurant.setExternalId(poi.getId());
-                restaurant.setCuisineType(extractCuisineType(poi.getType()));
-                restaurant.setCreatedAt(LocalDateTime.now());
+        log.info("[高德API] savePOIData: 开始处理 {} 个POI", response.getPois().size());
+        int saved = 0;
+        int skipped = 0;
+        int failed = 0;
 
-                restaurantRepository.save(restaurant);
+        for (AmapPOI poi : response.getPois()) {
+            try {
+                if (restaurantRepository.findByExternalId(poi.getId()).isEmpty()) {
+                    Restaurant restaurant = new Restaurant();
+                    restaurant.setName(poi.getName());
+                    restaurant.setAddress(poi.getAddress());
+                    restaurant.setLatitude(poi.getLocationLat());
+                    restaurant.setLongitude(poi.getLocationLng());
+                    restaurant.setSource("AMAP");
+                    restaurant.setExternalId(poi.getId());
+                    restaurant.setCuisineType(extractCuisineType(poi.getType()));
+                    restaurant.setCreatedAt(LocalDateTime.now());
+
+                    restaurantRepository.save(restaurant);
+                    saved++;
+                    log.debug("[高德API] 保存新餐厅: name={}, externalId={}, lat={}, lng={}, location={}",
+                            poi.getName(), poi.getId(), poi.getLocationLat(), poi.getLocationLng(), poi.getLocation());
+                } else {
+                    skipped++;
+                }
+            } catch (Exception e) {
+                failed++;
+                log.warn("[高德API] 保存POI失败: name={}, id={}, error={}", poi.getName(), poi.getId(), e.getMessage());
             }
         }
+
+        log.info("[高德API] savePOIData完成: 保存={}, 跳过(已存在)={}, 失败={}", saved, skipped, failed);
     }
 
     private String extractCuisineType(String type) {

@@ -184,6 +184,8 @@ public class ChatService {
     }
 
     private String buildSystemPrompt(User user, Double latitude, Double longitude) {
+        log.info("[Chat] buildSystemPrompt: userId={}, username={}, latitude={}, longitude={}",
+                user.getId(), user.getUsername(), latitude, longitude);
         StringBuilder sb = new StringBuilder(SYSTEM_PROMPT);
 
         User fullUser = userRepository.findById(user.getId()).orElse(user);
