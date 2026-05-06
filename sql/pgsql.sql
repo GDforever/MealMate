@@ -73,3 +73,48 @@ CREATE TABLE chat_messages
     created_at TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP
 );
 CREATE INDEX idx_chat_message_session_id_created_at ON chat_messages (session_id, created_at);
+
+-- Enable PGVector extension
+CREATE EXTENSION IF NOT EXISTS vector;
+
+-- Knowledge Bases
+CREATE TABLE knowledge_bases
+(
+    id          BIGSERIAL PRIMARY KEY,
+    title       VARCHAR(255) NOT NULL,
+    description VARCHAR(1000),
+    user_id     BIGINT       NOT NULL REFERENCES users (id),
+    is_public   BOOLEAN      NOT NULL DEFAULT FALSE,
+    created_at  TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at  TIMESTAMP    NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_knowledge_base_user_id ON knowledge_bases (user_id);
+
+-- Knowledge Documents
+CREATE TABLE knowledge_documents
+(
+    id                BIGSERIAL PRIMARY KEY,
+    knowledge_base_id BIGINT      NOT NULL REFERENCES knowledge_bases (id) ON DELETE CASCADE,
+    title             VARCHAR(255) NOT NULL,
+    content_type      VARCHAR(10) NOT NULL,
+    file_path         VARCHAR(500),
+    created_at        TIMESTAMP   NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_knowledge_document_kb_id ON knowledge_documents (knowledge_base_id);
+
+-- Knowledge Chunks (with vector embeddings)
+CREATE TABLE knowledge_chunks
+(
+    id                BIGSERIAL PRIMARY KEY,
+    document_id       BIGINT    NOT NULL REFERENCES knowledge_documents (id) ON DELETE CASCADE,
+    knowledge_base_id BIGINT    NOT NULL REFERENCES knowledge_bases (id) ON DELETE CASCADE,
+    chunk_index       INTEGER   NOT NULL,
+    content           TEXT      NOT NULL,
+    embedding         vector(1024),
+    created_at        TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+CREATE INDEX idx_knowledge_chunk_document_id ON knowledge_chunks (document_id);
+CREATE INDEX idx_knowledge_chunk_kb_id ON knowledge_chunks (knowledge_base_id);
