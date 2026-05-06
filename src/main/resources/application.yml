@@ -24,6 +24,9 @@ spring:
         options:
           model: ${AI_MODEL:deepseek-chat}
           temperature: 0.7
+      embedding:
+        options:
+          model: ${AI_EMBEDDING_MODEL:text-embedding-v3}
 
 server:
   port: 8234

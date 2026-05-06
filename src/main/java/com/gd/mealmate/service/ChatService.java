@@ -49,6 +49,11 @@ public class ChatService {
     private final ChatMessageMapper messageMapper;
     private final UserRepository userRepository;
     private final ObjectMapper objectMapper;
+    private final EmbeddingService embeddingService;
+    private final KnowledgeBaseService knowledgeBaseService;
+
+    @Value("${app.knowledge.top-k:5}")
+    private int knowledgeTopK;
 
     @Value("${chat.history.max-messages:50}")
     private int maxHistoryMessages;
@@ -98,7 +103,7 @@ public class ChatService {
         messageRepository.save(userMsg);
 
         // Build system prompt with user context
-        String systemContent = buildSystemPrompt(currentUser, latitude, longitude);
+        String systemContent = buildSystemPrompt(currentUser, latitude, longitude, userMessage);
         SystemMessage systemMessage = new SystemMessage(systemContent);
 
         // Build message history (already includes the just-saved user message)
@@ -183,7 +188,7 @@ public class ChatService {
         });
     }
 
-    private String buildSystemPrompt(User user, Double latitude, Double longitude) {
+    private String buildSystemPrompt(User user, Double latitude, Double longitude, String userMessage) {
         log.info("[Chat] buildSystemPrompt: userId={}, username={}, latitude={}, longitude={}",
                 user.getId(), user.getUsername(), latitude, longitude);
         StringBuilder sb = new StringBuilder(SYSTEM_PROMPT);
@@ -200,6 +205,23 @@ public class ChatService {
             sb.append("\n\n**重要**：当用户询问附近美食或餐厅推荐时，必须调用 `searchRestaurantsFunction`，并传入用户的当前位置坐标（latitude=").append(latitude).append(", longitude=").append(longitude).append("）。不要询问用户位置，直接使用这里的坐标。");
         } else {
             sb.append("\n\n**注意**：当前未获取到用户位置。如果用户询问附近美食或餐厅推荐，请礼貌地告诉用户系统暂时无法获取位置，建议用户在浏览器中允许定位权限后重试。");
+        }
+
+        // RAG: Inject relevant knowledge
+        try {
+            List<com.gd.mealmate.model.entity.KnowledgeChunk> relevantChunks =
+                    knowledgeBaseService.searchSimilarChunks(fullUser.getId(),
+                            userMessage != null ? userMessage : "", knowledgeTopK);
+            if (!relevantChunks.isEmpty()) {
+                sb.append("\n\n## 营养学知识库参考资料\n");
+                sb.append("以下是从知识库中检索到的相关资料，请在回答时参考这些内容：\n\n");
+                for (int i = 0; i < relevantChunks.size(); i++) {
+                    sb.append("### 参考资料 ").append(i + 1).append("\n");
+                    sb.append(relevantChunks.get(i).getContent()).append("\n\n");
+                }
+            }
+        } catch (Exception e) {
+            log.warn("Failed to retrieve knowledge chunks for RAG: {}", e.getMessage());
         }
 
         return sb.toString();
