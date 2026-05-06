@@ -5,7 +5,9 @@ import com.gd.mealmate.dto.request.CreateKnowledgeBaseRequest;
 import com.gd.mealmate.dto.response.ApiResponse;
 import com.gd.mealmate.dto.response.KnowledgeBaseDetailDto;
 import com.gd.mealmate.dto.response.KnowledgeBaseDto;
+import com.gd.mealmate.dto.response.KnowledgeChunkDto;
 import com.gd.mealmate.dto.response.KnowledgeDocumentDto;
+import com.gd.mealmate.security.UserPrincipal;
 import com.gd.mealmate.service.KnowledgeBaseService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -20,6 +22,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.List;
+
 @RestController
 @RequestMapping("/api/knowledge-bases")
 @RequiredArgsConstructor
@@ -32,63 +36,72 @@ public class KnowledgeBaseController {
     @PostMapping
     @Operation(summary = "Create knowledge base")
     public ApiResponse<KnowledgeBaseDto> createKnowledgeBase(
-            @AuthenticationPrincipal Long userId,
+            @AuthenticationPrincipal UserPrincipal principal,
             @Valid @RequestBody CreateKnowledgeBaseRequest request) {
-        return ApiResponse.success(knowledgeBaseService.createKnowledgeBase(userId, request));
+        return ApiResponse.success(knowledgeBaseService.createKnowledgeBase(principal.getUserId(), request));
     }
 
     @GetMapping
     @Operation(summary = "Get all knowledge bases")
     public ApiResponse<Page<KnowledgeBaseDto>> getKnowledgeBases(
-            @AuthenticationPrincipal Long userId,
+            @AuthenticationPrincipal UserPrincipal principal,
             @Parameter(description = "Search keyword") @RequestParam(required = false) String keyword,
             @PageableDefault(size = 10) Pageable pageable) {
-        return ApiResponse.success(knowledgeBaseService.getKnowledgeBases(userId, keyword, pageable));
+        return ApiResponse.success(knowledgeBaseService.getKnowledgeBases(principal.getUserId(), keyword, pageable));
     }
 
     @GetMapping("/{id}")
     @Operation(summary = "Get knowledge base detail")
     public ApiResponse<KnowledgeBaseDetailDto> getKnowledgeBaseDetail(
-            @AuthenticationPrincipal Long userId,
+            @AuthenticationPrincipal UserPrincipal principal,
             @Parameter(description = "Knowledge base ID") @PathVariable Long id) {
-        return ApiResponse.success(knowledgeBaseService.getKnowledgeBaseDetail(userId, id));
+        return ApiResponse.success(knowledgeBaseService.getKnowledgeBaseDetail(principal.getUserId(), id));
     }
 
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete knowledge base")
     public ApiResponse<Void> deleteKnowledgeBase(
-            @AuthenticationPrincipal Long userId,
+            @AuthenticationPrincipal UserPrincipal principal,
             @Parameter(description = "Knowledge base ID") @PathVariable Long id) {
-        knowledgeBaseService.deleteKnowledgeBase(userId, id);
+        knowledgeBaseService.deleteKnowledgeBase(principal.getUserId(), id);
         return ApiResponse.success();
     }
 
     @PostMapping("/{id}/documents/text")
     @Operation(summary = "Add text document to knowledge base")
     public ApiResponse<KnowledgeDocumentDto> addTextDocument(
-            @AuthenticationPrincipal Long userId,
+            @AuthenticationPrincipal UserPrincipal principal,
             @Parameter(description = "Knowledge base ID") @PathVariable Long id,
             @Valid @RequestBody CreateDocumentRequest request) {
-        return ApiResponse.success(knowledgeBaseService.addTextDocument(userId, id, request));
+        return ApiResponse.success(knowledgeBaseService.addTextDocument(principal.getUserId(), id, request));
     }
 
     @PostMapping("/{id}/documents/file")
     @Operation(summary = "Upload file document to knowledge base")
     public ApiResponse<KnowledgeDocumentDto> uploadFileDocument(
-            @AuthenticationPrincipal Long userId,
+            @AuthenticationPrincipal UserPrincipal principal,
             @Parameter(description = "Knowledge base ID") @PathVariable Long id,
             @Parameter(description = "Document title") @RequestParam String title,
             @Parameter(description = "File (PDF/DOCX/TXT)") @RequestParam MultipartFile file) {
-        return ApiResponse.success(knowledgeBaseService.uploadFileDocument(userId, id, title, file));
+        return ApiResponse.success(knowledgeBaseService.uploadFileDocument(principal.getUserId(), id, title, file));
     }
 
     @DeleteMapping("/{kbId}/documents/{docId}")
     @Operation(summary = "Delete document from knowledge base")
     public ApiResponse<Void> deleteDocument(
-            @AuthenticationPrincipal Long userId,
+            @AuthenticationPrincipal UserPrincipal principal,
             @Parameter(description = "Knowledge base ID") @PathVariable Long kbId,
             @Parameter(description = "Document ID") @PathVariable Long docId) {
-        knowledgeBaseService.deleteDocument(userId, kbId, docId);
+        knowledgeBaseService.deleteDocument(principal.getUserId(), kbId, docId);
         return ApiResponse.success();
+    }
+
+    @GetMapping("/{kbId}/documents/{docId}/chunks")
+    @Operation(summary = "Get document chunks")
+    public ApiResponse<List<KnowledgeChunkDto>> getDocumentChunks(
+            @AuthenticationPrincipal UserPrincipal principal,
+            @Parameter(description = "Knowledge base ID") @PathVariable Long kbId,
+            @Parameter(description = "Document ID") @PathVariable Long docId) {
+        return ApiResponse.success(knowledgeBaseService.getDocumentChunks(principal.getUserId(), kbId, docId));
     }
 }

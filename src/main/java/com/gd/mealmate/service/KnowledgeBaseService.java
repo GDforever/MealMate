@@ -4,6 +4,7 @@ import com.gd.mealmate.dto.request.CreateDocumentRequest;
 import com.gd.mealmate.dto.request.CreateKnowledgeBaseRequest;
 import com.gd.mealmate.dto.response.KnowledgeBaseDetailDto;
 import com.gd.mealmate.dto.response.KnowledgeBaseDto;
+import com.gd.mealmate.dto.response.KnowledgeChunkDto;
 import com.gd.mealmate.dto.response.KnowledgeDocumentDto;
 import com.gd.mealmate.exception.BusinessException;
 import com.gd.mealmate.exception.ErrorCode;
@@ -185,6 +186,26 @@ public class KnowledgeBaseService {
         deleteLocalFile(doc.getFilePath());
         chunkRepository.deleteAllByDocumentId(docId);
         documentRepository.delete(doc);
+    }
+
+    public List<KnowledgeChunkDto> getDocumentChunks(Long userId, Long kbId, Long docId) {
+        KnowledgeBase kb = getKnowledgeBase(kbId);
+        checkReadAccess(kb, userId);
+
+        KnowledgeDocument doc = documentRepository.findById(docId)
+                .orElseThrow(() -> new BusinessException(ErrorCode.KNOWLEDGE_DOCUMENT_NOT_FOUND));
+        if (!doc.getKnowledgeBase().getId().equals(kbId)) {
+            throw new BusinessException(ErrorCode.KNOWLEDGE_DOCUMENT_NOT_FOUND);
+        }
+
+        return chunkRepository.findChunkDetailsByDocumentId(docId).stream()
+                .map(row -> new KnowledgeChunkDto(
+                        ((Number) row[0]).longValue(),
+                        docId,
+                        (Integer) row[3],
+                        (String) row[4],
+                        ((java.sql.Timestamp) row[5]).toLocalDateTime()))
+                .toList();
     }
 
     public List<KnowledgeChunk> searchSimilarChunks(Long userId, String queryText, int limit) {

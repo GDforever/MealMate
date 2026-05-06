@@ -31,6 +31,10 @@
           <el-icon><MapLocation /></el-icon>
           <span>餐厅搜索</span>
         </el-menu-item>
+        <el-menu-item index="/knowledge">
+          <el-icon><Collection /></el-icon>
+          <span>知识库</span>
+        </el-menu-item>
         <el-menu-item index="/settings">
           <el-icon><Setting /></el-icon>
           <span>个人设置</span>
@@ -61,6 +65,7 @@ import {
   Calendar,
   DataAnalysis,
   MapLocation,
+  Collection,
   Setting,
   UserFilled
 } from '@element-plus/icons-vue'

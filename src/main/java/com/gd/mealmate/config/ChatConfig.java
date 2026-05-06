@@ -10,6 +10,8 @@ import org.springframework.ai.model.function.FunctionCallbackContext;
 import org.springframework.ai.model.function.FunctionCallbackWrapper;
 import org.springframework.ai.openai.OpenAiChatModel;
 import org.springframework.ai.openai.OpenAiChatOptions;
+import org.springframework.ai.document.MetadataMode;
+import org.springframework.ai.openai.OpenAiEmbeddingModel;
 import org.springframework.ai.openai.api.OpenAiApi;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -33,9 +35,33 @@ public class ChatConfig {
     @Value("${spring.ai.openai.chat.options.temperature:0.7}")
     private Double temperature;
 
+    @Value("${spring.ai.openai.embedding.base-url:${spring.ai.openai.base-url}}")
+    private String embeddingBaseUrl;
+
+    @Value("${spring.ai.openai.embedding.api-key:${spring.ai.openai.api-key}}")
+    private String embeddingApiKey;
+
+    @Value("${spring.ai.openai.embedding.options.model:text-embedding-v3}")
+    private String embeddingModel;
+
     @Bean
     public OpenAiApi openAiApi() {
         return new OpenAiApi(baseUrl, apiKey);
+    }
+
+    @Bean
+    public OpenAiApi embeddingOpenAiApi() {
+        return new OpenAiApi(embeddingBaseUrl, embeddingApiKey);
+    }
+
+    @Bean
+    public OpenAiEmbeddingModel embeddingModel() {
+        return new OpenAiEmbeddingModel(embeddingOpenAiApi(),
+                MetadataMode.ALL,
+                org.springframework.ai.openai.OpenAiEmbeddingOptions.builder()
+                        .withModel(embeddingModel)
+                        .build(),
+                RetryTemplate.builder().build());
     }
 
     @Bean

@@ -36,7 +36,10 @@
       "Bash(xargs -I{} jar tf {})",
       "Bash(javap -classpath ~/.m2/repository/org/springframework/ai/spring-ai-openai/1.0.0-M4/spring-ai-openai-1.0.0-M4.jar org.springframework.ai.openai.OpenAiChatModel)",
       "Bash(javap -classpath ~/.m2/repository/org/springframework/ai/spring-ai-core/1.0.0-M4/spring-ai-core-1.0.0-M4.jar org.springframework.ai.model.function.FunctionCallbackWrapper)",
-      "Bash(javap -classpath ~/.m2/repository/org/springframework/ai/spring-ai-core/1.0.0-M4/spring-ai-core-1.0.0-M4.jar org.springframework.ai.model.function.FunctionCallbackContext)"
+      "Bash(javap -classpath ~/.m2/repository/org/springframework/ai/spring-ai-core/1.0.0-M4/spring-ai-core-1.0.0-M4.jar org.springframework.ai.model.function.FunctionCallbackContext)",
+      "Bash(xargs wc *)",
+      "Bash(git *)",
+      "WebSearch"
     ]
   }
 }

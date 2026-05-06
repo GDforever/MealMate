@@ -60,6 +60,18 @@ const routes: RouteRecordRaw[] = [
         meta: { title: '餐厅详情' }
       },
       {
+        path: 'knowledge',
+        name: 'KnowledgeList',
+        component: () => import('@/views/knowledge/KnowledgeListView.vue'),
+        meta: { title: '知识库' }
+      },
+      {
+        path: 'knowledge/:id',
+        name: 'KnowledgeDetail',
+        component: () => import('@/views/knowledge/KnowledgeDetailView.vue'),
+        meta: { title: '知识库详情' }
+      },
+      {
         path: 'settings',
         name: 'Settings',
         component: () => import('@/views/settings/SettingsView.vue'),
