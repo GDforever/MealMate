@@ -26,7 +26,7 @@ spring:
           temperature: 0.7
 
 server:
-  port: 8234
+  port: 8456
 
 jwt:
   secret: ${JWT_SECRET:default-dev-secret-key-at-least-256-bits-long-for-hs256-please-change-in-production}

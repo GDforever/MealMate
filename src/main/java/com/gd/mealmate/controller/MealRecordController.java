@@ -4,6 +4,7 @@ import com.gd.mealmate.dto.request.MealRecordRequest;
 import com.gd.mealmate.dto.response.ApiResponse;
 import com.gd.mealmate.dto.response.MealRecordDto;
 import com.gd.mealmate.model.enums.MealType;
+import com.gd.mealmate.security.UserPrincipal;
 import com.gd.mealmate.service.MealRecordService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -33,8 +34,9 @@ public class MealRecordController {
     @PostMapping
     @Operation(summary = "Create meal record", description = "Creates a new meal record for the authenticated user")
     public ApiResponse<MealRecordDto> createMealRecord(
-            @AuthenticationPrincipal Long userId,
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
             @Valid @RequestBody MealRecordRequest request) {
+        Long userId = userPrincipal.getUserId();
         MealRecordDto mealRecord = mealRecordService.createMealRecord(userId, request);
         return ApiResponse.success(mealRecord);
     }
@@ -42,7 +44,7 @@ public class MealRecordController {
     @GetMapping
     @Operation(summary = "Get meal records", description = "Returns paginated list of user's meal records with optional filters")
     public ApiResponse<Page<MealRecordDto>> getMealRecords(
-            @AuthenticationPrincipal Long userId,
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
             @Parameter(description = "Start date for filtering (yyyy-MM-dd)")
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
             @Parameter(description = "End date for filtering (yyyy-MM-dd)")
@@ -50,6 +52,7 @@ public class MealRecordController {
             @Parameter(description = "Meal type filter")
             @RequestParam(required = false) MealType mealType,
             @PageableDefault(size = 20) Pageable pageable) {
+        Long userId = userPrincipal.getUserId();
         LocalDateTime startDateTime = startDate != null ? startDate.atStartOfDay() : null;
         LocalDateTime endDateTime = endDate != null ? endDate.atTime(23, 59, 59) : null;
         Page<MealRecordDto> mealRecords = mealRecordService.getMealRecords(userId, startDateTime, endDateTime, mealType, pageable);
@@ -59,8 +62,9 @@ public class MealRecordController {
     @GetMapping("/{id}")
     @Operation(summary = "Get meal record by ID", description = "Returns a specific meal record owned by the authenticated user")
     public ApiResponse<MealRecordDto> getMealRecordById(
-            @AuthenticationPrincipal Long userId,
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
             @Parameter(description = "Meal record ID") @PathVariable Long id) {
+        Long userId = userPrincipal.getUserId();
         MealRecordDto mealRecord = mealRecordService.getMealRecordById(userId, id);
         return ApiResponse.success(mealRecord);
     }
@@ -68,9 +72,10 @@ public class MealRecordController {
     @PutMapping("/{id}")
     @Operation(summary = "Update meal record", description = "Updates an existing meal record owned by the authenticated user")
     public ApiResponse<MealRecordDto> updateMealRecord(
-            @AuthenticationPrincipal Long userId,
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
             @Parameter(description = "Meal record ID") @PathVariable Long id,
             @Valid @RequestBody MealRecordRequest request) {
+        Long userId = userPrincipal.getUserId();
         MealRecordDto mealRecord = mealRecordService.updateMealRecord(userId, id, request);
         return ApiResponse.success(mealRecord);
     }
@@ -78,8 +83,9 @@ public class MealRecordController {
     @DeleteMapping("/{id}")
     @Operation(summary = "Delete meal record", description = "Deletes a meal record owned by the authenticated user")
     public ApiResponse<Void> deleteMealRecord(
-            @AuthenticationPrincipal Long userId,
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
             @Parameter(description = "Meal record ID") @PathVariable Long id) {
+        Long userId = userPrincipal.getUserId();
         mealRecordService.deleteMealRecord(userId, id);
         return ApiResponse.success();
     }

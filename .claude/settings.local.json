@@ -39,7 +39,14 @@
       "Bash(javap -classpath ~/.m2/repository/org/springframework/ai/spring-ai-core/1.0.0-M4/spring-ai-core-1.0.0-M4.jar org.springframework.ai.model.function.FunctionCallbackContext)",
       "Bash(xargs wc *)",
       "Bash(git *)",
-      "WebSearch"
+      "WebSearch",
+      "Bash(PGPASSWORD=123456 psql *)",
+      "Bash(taskkill *)",
+      "Bash(echo \"Starting... PID=$!\")",
+      "Bash(netstat -ano)",
+      "Bash(python3 -c \"import bcrypt; print\\(bcrypt.hashpw\\(b'Test123456', bcrypt.gensalt\\(\\)\\).decode\\(\\)\\)\")",
+      "Bash(size=10 2>&1)",
+      "Bash(PGPASSWORD=your-password psql *)"
     ]
   }
 }

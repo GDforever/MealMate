@@ -3,6 +3,7 @@ package com.gd.mealmate.controller;
 import com.gd.mealmate.dto.request.UpdatePreferencesRequest;
 import com.gd.mealmate.dto.response.ApiResponse;
 import com.gd.mealmate.dto.response.UserDto;
+import com.gd.mealmate.security.UserPrincipal;
 import com.gd.mealmate.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
@@ -23,7 +24,8 @@ public class UserController {
 
     @GetMapping("/me")
     @Operation(summary = "Get current user", description = "Returns the authenticated user's profile")
-    public ApiResponse<UserDto> getCurrentUser(@AuthenticationPrincipal Long userId) {
+    public ApiResponse<UserDto> getCurrentUser(@AuthenticationPrincipal UserPrincipal userPrincipal) {
+        Long userId = userPrincipal.getUserId();
         UserDto user = userService.getCurrentUser(userId);
         return ApiResponse.success(user);
     }
@@ -31,8 +33,9 @@ public class UserController {
     @PutMapping("/preferences")
     @Operation(summary = "Update user preferences", description = "Updates the authenticated user's taste preferences")
     public ApiResponse<UserDto> updatePreferences(
-            @AuthenticationPrincipal Long userId,
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
             @Valid @RequestBody UpdatePreferencesRequest request) {
+        Long userId = userPrincipal.getUserId();
         UserDto user = userService.updatePreferences(userId, request);
         return ApiResponse.success(user);
     }

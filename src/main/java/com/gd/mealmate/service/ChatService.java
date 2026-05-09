@@ -30,6 +30,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import reactor.core.publisher.Flux;
 
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -209,6 +211,9 @@ public class ChatService {
         log.info("[Chat] buildSystemPrompt: userId={}, username={}, latitude={}, longitude={}",
                 user.getId(), user.getUsername(), latitude, longitude);
         StringBuilder sb = new StringBuilder(SYSTEM_PROMPT);
+
+        sb.append("\n\n## 当前时间\n").append(LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")))
+                .append("\n\n**重要**：用户说今天、昨天等相对时间时，必须基于上面的当前时间计算 recordedAt 字段，不要自行编造日期。");
 
         User fullUser = userRepository.findById(user.getId()).orElse(user);
         if (fullUser.getTastePreferences() != null && !fullUser.getTastePreferences().isBlank()) {

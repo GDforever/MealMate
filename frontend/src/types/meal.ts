@@ -3,31 +3,34 @@ export type MealType = 'BREAKFAST' | 'LUNCH' | 'DINNER' | 'SNACK'
 export interface MealRecord {
   id: number
   userId: number
-  date: string
   mealType: MealType
-  restaurantId?: number
+  foodName: string
   restaurantName?: string
-  dishes: string
-  calories?: number
-  notes?: string
+  location?: string
+  latitude?: number
+  longitude?: number
+  recordedAt: string
+  userRating?: number
+  tags?: string
   createdAt: string
-  updatedAt: string
 }
 
 export interface MealRecordRequest {
-  date: string
   mealType: MealType
-  restaurantId?: number
-  dishes: string
-  calories?: number
-  notes?: string
+  foodName: string
+  restaurantName?: string
+  location?: string
+  latitude?: number
+  longitude?: number
+  recordedAt: string
+  userRating?: number
+  tags?: string
 }
 
 export interface MealFilters {
   startDate?: string
   endDate?: string
   mealType?: MealType
-  restaurantId?: number
 }
 
 export interface MealStats {
