@@ -80,6 +80,7 @@ ALTER TABLE chat_messages ADD COLUMN image_url VARCHAR(500);
 -- meal_records: add source tracking and image reference
 ALTER TABLE meal_records ADD COLUMN image_url VARCHAR(500);
 ALTER TABLE meal_records ADD COLUMN source VARCHAR(20) DEFAULT 'CHAT';
+-- source maps to RecordSource enum: CHAT, PHOTO, MANUAL
 ```
 
 JPA `ddl-auto: update` will handle schema migration.
