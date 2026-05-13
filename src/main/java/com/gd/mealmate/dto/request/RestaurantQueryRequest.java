@@ -12,4 +12,5 @@ public class RestaurantQueryRequest {
     private Double longitude;
     private Double radius = 3000.0; // default 3km
     private String cuisineType;
+    private String keyword;
 }

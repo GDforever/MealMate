@@ -86,7 +86,11 @@ public class ChatConfig {
                         .build(),
                 FunctionCallbackWrapper.builder(createMealRecordFunction)
                         .withName("createMealRecordFunction")
-                        .withDescription("创建用餐记录")
+                        .withDescription("创建用餐记录。当用户描述自己吃了什么、喝了什么、在哪吃的等信息时，必须立即调用此函数记录。" +
+                                "参数说明：userId(用户ID，必填)、mealType(用餐类型，必填，可选值：BREAKFAST早餐/LUNCH午餐/DINNER晚餐/SNACK加餐)、" +
+                                "foodName(食物名称，必填，如'小米粥、鸡蛋')、restaurantName(餐厅名称，可选)、location(用餐地点，可选)、" +
+                                "latitude(纬度，可选)、longitude(经度，可选)、recordedAt(用餐时间，必填，格式：yyyy-MM-ddTHH:mm:ss)、" +
+                                "userRating(评分1-5，可选)、tags(标签，可选，逗号分隔如'清淡,低脂')")
                         .build(),
                 FunctionCallbackWrapper.builder(saveUserPreferencesFunction)
                         .withName("saveUserPreferencesFunction")

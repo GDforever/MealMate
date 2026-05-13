@@ -65,6 +65,17 @@
           @click="handleRestaurantClick"
         />
       </div>
+
+      <div v-if="restaurantStore.totalElements > 0" class="pagination-wrapper">
+        <el-pagination
+          v-model:current-page="currentPage"
+          :page-size="restaurantStore.pageSize"
+          :total="restaurantStore.totalElements"
+          layout="prev, pager, next, total"
+          background
+          @current-change="handlePageChange"
+        />
+      </div>
     </div>
   </div>
 </template>
@@ -90,6 +101,10 @@ const searchForm = ref({
 })
 
 const restaurants = computed(() => restaurantStore.list)
+const currentPage = computed({
+  get: () => restaurantStore.currentPage + 1,
+  set: (val: number) => { restaurantStore.currentPage = val - 1 }
+})
 
 onMounted(async () => {
   await loadRestaurants()
@@ -119,6 +134,12 @@ const handleGetCurrentLocation = async () => {
 }
 
 const handleSearch = () => {
+  restaurantStore.currentPage = 0
+  loadRestaurants()
+}
+
+const handlePageChange = (page: number) => {
+  restaurantStore.currentPage = page - 1
   loadRestaurants()
 }
 
@@ -174,5 +195,11 @@ const handleRestaurantClick = (restaurant: any) => {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
   gap: 16px;
+}
+
+.pagination-wrapper {
+  display: flex;
+  justify-content: center;
+  margin-top: 24px;
 }
 </style>

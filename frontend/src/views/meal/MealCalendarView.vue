@@ -160,8 +160,14 @@ const calendarDays = computed(() => {
   return days
 })
 
-onMounted(() => {
-  loadMeals()
+onMounted(async () => {
+  await loadMeals()
+  const todayStr = new Date().toISOString().slice(0, 10)
+  const todayDay = calendarDays.value.find(d => d.date === todayStr)
+  if (todayDay) {
+    selectedDate.value = todayDay.date
+    selectedDateMeals.value = todayDay.meals
+  }
 })
 
 const loadMeals = async () => {

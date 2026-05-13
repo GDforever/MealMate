@@ -20,6 +20,7 @@ public class RestaurantDto {
     private BigDecimal avgPrice;
     private Double rating;
     private String source;
+    private String photoUrl;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
 }

@@ -49,7 +49,8 @@ public class SearchRestaurantsFunction implements Function<SearchRestaurantsRequ
                     request.getLatitude(),
                     request.getLongitude(),
                     radius,
-                    request.getCuisineType()
+                    request.getCuisineType(),
+                    request.getKeywords()
             );
 
             log.info("[搜索餐厅] 实际查询参数: latitude={}, longitude={}, radius={}米, cuisineType={}",
@@ -105,7 +106,8 @@ public class SearchRestaurantsFunction implements Function<SearchRestaurantsRequ
 
                             // Re-query with the expanded radius that actually found results
                             RestaurantQueryRequest expandedQuery = new RestaurantQueryRequest(
-                                    request.getLatitude(), request.getLongitude(), tryRadius, request.getCuisineType()
+                                    request.getLatitude(), request.getLongitude(), tryRadius, request.getCuisineType(),
+                                    request.getKeywords()
                             );
                             log.info("[搜索餐厅] Step 3: 用 radius={}米 重新查询本地数据库...", (int) tryRadius);
                             Page<RestaurantDto> refreshed = restaurantService.findNearby(expandedQuery, pageable);

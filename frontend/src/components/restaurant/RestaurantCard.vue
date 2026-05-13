@@ -1,36 +1,38 @@
 <!-- src/components/restaurant/RestaurantCard.vue -->
 <template>
   <el-card class="restaurant-card" shadow="hover" @click="handleClick">
-    <div class="card-header">
-      <h3 class="name">{{ restaurant.name }}</h3>
-      <span v-if="restaurant.distance != null" class="distance">
-        {{ formatDistance(restaurant.distance) }}
-      </span>
+    <div v-if="restaurant.photoUrl" class="card-image">
+      <img :src="restaurant.photoUrl" :alt="restaurant.name" />
     </div>
-
-    <div class="card-tags">
-      <el-tag v-if="restaurant.cuisineType" size="small" type="primary" effect="plain">
-        {{ restaurant.cuisineType }}
-      </el-tag>
-      <el-tag v-if="restaurant.source" size="small" effect="plain">
-        {{ restaurant.source }}
-      </el-tag>
-    </div>
-
-    <div class="card-info">
-      <div v-if="restaurant.rating != null" class="rating">
-        <el-rate :model-value="restaurant.rating / 2" disabled :max="5" size="small" />
-        <span class="rating-text">{{ restaurant.rating.toFixed(1) }}</span>
+    <div class="card-body">
+      <div class="card-header">
+        <h3 class="name">{{ restaurant.name }}</h3>
+        <span v-if="restaurant.distance != null" class="distance">
+          {{ formatDistance(restaurant.distance) }}
+        </span>
       </div>
-      <span v-if="restaurant.avgPrice != null" class="price">
-        ¥{{ restaurant.avgPrice }}/人
-      </span>
-    </div>
 
-    <p v-if="restaurant.address" class="address">
-      <el-icon><Location /></el-icon>
-      {{ restaurant.address }}
-    </p>
+      <div class="card-tags">
+        <el-tag v-if="restaurant.cuisineType" size="small" type="primary" effect="plain">
+          {{ restaurant.cuisineType }}
+        </el-tag>
+      </div>
+
+      <div class="card-info">
+        <div v-if="restaurant.rating != null" class="rating">
+          <el-rate :model-value="restaurant.rating / 2" disabled :max="5" size="small" />
+          <span class="rating-text">{{ restaurant.rating.toFixed(1) }}</span>
+        </div>
+        <span v-if="restaurant.avgPrice != null" class="price">
+          ¥{{ restaurant.avgPrice }}/人
+        </span>
+      </div>
+
+      <p v-if="restaurant.address" class="address">
+        <el-icon><Location /></el-icon>
+        {{ restaurant.address }}
+      </p>
+    </div>
   </el-card>
 </template>
 
@@ -60,14 +62,31 @@ const formatDistance = (meters: number) => {
 .restaurant-card {
   cursor: pointer;
   transition: transform 0.2s;
+  overflow: hidden;
 
   &:hover {
     transform: translateY(-2px);
   }
 
   :deep(.el-card__body) {
-    padding: 16px;
+    padding: 0;
   }
+}
+
+.card-image {
+  width: 100%;
+  height: 160px;
+  overflow: hidden;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.card-body {
+  padding: 16px;
 }
 
 .card-header {

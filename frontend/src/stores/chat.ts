@@ -39,7 +39,7 @@ export const useChatStore = defineStore('chat', () => {
 
   const fetchSessionMessages = async (sessionId: number) => {
     const data = await chatApi.getSessionDetail(sessionId)
-    messages.value.set(sessionId, data.messages || [])
+    messages.value.set(sessionId, Array.isArray(data) ? data : data.messages || [])
   }
 
   const addUserMessage = (content: string) => {

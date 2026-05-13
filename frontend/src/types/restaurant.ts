@@ -8,6 +8,7 @@ export interface Restaurant {
   avgPrice?: number
   rating?: number
   source?: string
+  photoUrl?: string
   distance?: number
   createdAt: string
   updatedAt: string
@@ -19,6 +20,8 @@ export interface RestaurantSearchParams {
   longitude?: number
   radius?: number
   cuisineType?: string
+  page?: number
+  size?: number
 }
 
 export interface Location {

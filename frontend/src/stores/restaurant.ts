@@ -5,6 +5,10 @@ import type { Restaurant, RestaurantSearchParams, Location } from '@/types'
 
 export const useRestaurantStore = defineStore('restaurant', () => {
   const list = ref<Restaurant[]>([])
+  const totalElements = ref(0)
+  const totalPages = ref(0)
+  const currentPage = ref(0)
+  const pageSize = ref(12)
   const searchParams = ref<RestaurantSearchParams>({
     latitude: 39.9042,
     longitude: 116.4074,
@@ -14,10 +18,17 @@ export const useRestaurantStore = defineStore('restaurant', () => {
   const userLocation = ref<Location | null>(null)
 
   const searchNearby = async (params?: Partial<RestaurantSearchParams>) => {
-    const finalParams = { ...searchParams.value, ...params }
+    const finalParams = {
+      ...searchParams.value,
+      ...params,
+      page: currentPage.value,
+      size: pageSize.value
+    }
     searchParams.value = finalParams
     const page = await restaurantApi.searchNearby(finalParams)
     list.value = page.content || []
+    totalElements.value = page.totalElements
+    totalPages.value = page.totalPages
   }
 
   const fetchDetail = async (id: number) => {
@@ -55,6 +66,10 @@ export const useRestaurantStore = defineStore('restaurant', () => {
 
   return {
     list,
+    totalElements,
+    totalPages,
+    currentPage,
+    pageSize,
     searchParams,
     selectedRestaurant,
     userLocation,

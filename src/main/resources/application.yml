@@ -68,7 +68,7 @@ app:
   upload:
     dir: ${UPLOAD_DIR:./uploads}
   knowledge:
-    chunk-size: 500
+    chunk-size: 100
     chunk-overlap: 50
     top-k: 5
     similarity-threshold: 0.7

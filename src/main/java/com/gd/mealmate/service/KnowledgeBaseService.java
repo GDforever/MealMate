@@ -224,17 +224,15 @@ public class KnowledgeBaseService {
     }
 
     private void createAndSaveChunks(KnowledgeDocument doc, KnowledgeBase kb, String text) {
+        log.info("Starting chunking: text length={}", text.length());
         List<String> chunks = documentParseService.splitIntoChunks(text);
+        log.info("Split into {} chunks, sizes: {}", chunks.size(),
+                chunks.stream().map(String::length).toList());
         for (int i = 0; i < chunks.size(); i++) {
             float[] embedding = embeddingService.embed(chunks.get(i));
-            KnowledgeChunk chunk = KnowledgeChunk.builder()
-                    .document(doc)
-                    .knowledgeBase(kb)
-                    .chunkIndex(i)
-                    .content(chunks.get(i))
-                    .embedding(embedding)
-                    .build();
-            chunkRepository.save(chunk);
+            chunkRepository.insertChunk(
+                    doc.getId(), kb.getId(), i,
+                    chunks.get(i), EmbeddingService.toVectorString(embedding));
         }
     }
 

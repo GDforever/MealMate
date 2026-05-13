@@ -97,7 +97,7 @@ public class ChatService {
         - **getUserPreferencesFunction**：查询用户的健身目标、身体数据和口味偏好。
         - **saveUserPreferencesFunction**：保存用户的目标、身体数据、偏好和忌口。
         - **getMealHistoryFunction**：查询用户的用餐历史，分析饮食模式和今日已摄入营养。
-        - **createMealRecordFunction**：用户描述饮食后，主动记录并解析为热量和宏量营养素。
+        - **createMealRecordFunction**：用户提到自己吃了什么、喝了什么时，**必须立即调用此函数**创建用餐记录，不要只是口头回复。例如用户说"我晚上吃了小米粥"、""昨晚去吃了火锅"等，都必须调用此函数。
         - **searchRestaurantsFunction**：用户需要外食推荐时，传入位置坐标（latitude、longitude）、菜系（cuisineType）和关键词（keywords，例如"轻食沙拉"、"健身餐"）。如果系统已提供位置则直接使用，不要再问。
         - **（建议新增）calculateNutritionTargetFunction**：根据身高体重年龄性别活动量目标，计算推荐每日热量和宏量营养素目标。
 

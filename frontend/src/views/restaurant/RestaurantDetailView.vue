@@ -10,6 +10,10 @@
     <el-row :gutter="24" v-if="restaurant">
       <el-col :span="16">
         <el-card class="detail-card">
+          <div v-if="restaurant.photoUrl" class="detail-image">
+            <img :src="restaurant.photoUrl" :alt="restaurant.name" />
+          </div>
+
           <div class="detail-header">
             <div class="rating-info">
               <el-rate
@@ -171,6 +175,20 @@ const handleSubmit = async (data: MealRecordRequest) => {
 
 .detail-card {
   min-height: 300px;
+}
+
+.detail-image {
+  width: 100%;
+  max-height: 300px;
+  border-radius: 8px;
+  overflow: hidden;
+  margin-bottom: 16px;
+
+  img {
+    width: 100%;
+    height: 300px;
+    object-fit: cover;
+  }
 }
 
 .detail-header {

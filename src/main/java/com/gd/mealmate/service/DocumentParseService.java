@@ -18,6 +18,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 @Service
@@ -72,19 +73,108 @@ public class DocumentParseService {
             return List.of();
         }
 
-        List<String> chunks = new ArrayList<>();
         int charChunkSize = chunkSize * 3 / 2;
         int charOverlap = chunkOverlap * 3 / 2;
-        int pos = 0;
 
+        List<String> paragraphs = Arrays.stream(text.split("\\n\\s*\\n"))
+                .map(String::trim)
+                .filter(s -> !s.isEmpty())
+                .toList();
+
+        List<String> sentences = new ArrayList<>();
+        for (String para : paragraphs) {
+            sentences.addAll(splitIntoSentences(para, charChunkSize));
+        }
+
+        return mergeIntoChunks(sentences, charChunkSize, charOverlap);
+    }
+
+    private List<String> splitIntoSentences(String text, int maxSize) {
+        List<String> sentences = new ArrayList<>();
+        int start = 0;
+
+        for (int i = 0; i < text.length(); i++) {
+            if (isSentenceEnd(text.charAt(i))) {
+                String sentence = text.substring(start, i + 1).trim();
+                if (!sentence.isEmpty()) {
+                    if (sentence.length() > maxSize) {
+                        sentences.addAll(splitByFixedSize(sentence, maxSize));
+                    } else {
+                        sentences.add(sentence);
+                    }
+                }
+                start = i + 1;
+            }
+        }
+
+        if (start < text.length()) {
+            String remaining = text.substring(start).trim();
+            if (!remaining.isEmpty()) {
+                if (remaining.length() > maxSize) {
+                    sentences.addAll(splitByFixedSize(remaining, maxSize));
+                } else {
+                    sentences.add(remaining);
+                }
+            }
+        }
+
+        if (sentences.isEmpty() && !text.trim().isEmpty()) {
+            sentences.addAll(splitByFixedSize(text.trim(), maxSize));
+        }
+
+        return sentences;
+    }
+
+    private boolean isSentenceEnd(char c) {
+        return c == '。' || c == '！' || c == '？' || c == '；'
+                || c == '.' || c == '!' || c == '?' || c == ';'
+                || c == '\n';
+    }
+
+    private List<String> splitByFixedSize(String text, int size) {
+        List<String> result = new ArrayList<>();
+        int pos = 0;
         while (pos < text.length()) {
-            int end = Math.min(pos + charChunkSize, text.length());
+            int end = Math.min(pos + size, text.length());
             String chunk = text.substring(pos, end).trim();
             if (!chunk.isEmpty()) {
-                chunks.add(chunk);
+                result.add(chunk);
             }
-            pos += charChunkSize - charOverlap;
-            if (pos >= text.length()) break;
+            pos = end;
+        }
+        return result;
+    }
+
+    private List<String> mergeIntoChunks(List<String> segments, int chunkSize, int overlap) {
+        if (segments.isEmpty()) return List.of();
+
+        List<String> chunks = new ArrayList<>();
+        int segStart = 0;
+
+        while (segStart < segments.size()) {
+            StringBuilder chunk = new StringBuilder();
+            int segEnd = segStart;
+
+            while (segEnd < segments.size()) {
+                String seg = segments.get(segEnd);
+                if (chunk.length() > 0 && chunk.length() + seg.length() > chunkSize) {
+                    break;
+                }
+                chunk.append(seg);
+                segEnd++;
+            }
+
+            chunks.add(chunk.toString().trim());
+
+            if (segEnd >= segments.size()) break;
+
+            int newStart = segEnd;
+            int overlapLen = 0;
+            while (newStart > segStart + 1 && overlapLen < overlap) {
+                newStart--;
+                overlapLen += segments.get(newStart).length();
+            }
+            segStart = newStart;
         }
 
         return chunks;

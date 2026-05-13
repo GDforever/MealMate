@@ -19,10 +19,12 @@ public interface RestaurantRepository extends JpaRepository<Restaurant, Long> {
            "(6371 * acos(cos(radians(:latitude)) * cos(radians(r.latitude)) * " +
            "cos(radians(r.longitude) - radians(:longitude)) + " +
            "sin(radians(:latitude)) * sin(radians(r.latitude)))) < :radius/1000) " +
-           "AND (:cuisineType IS NULL OR r.cuisineType = :cuisineType)")
+           "AND (:cuisineType IS NULL OR r.cuisineType = :cuisineType) " +
+           "AND (:keyword IS NULL OR LOWER(r.name) LIKE LOWER(CAST(CONCAT('%', :keyword, '%') AS string)))")
     Page<Restaurant> findNearby(@Param("latitude") Double latitude,
                                  @Param("longitude") Double longitude,
                                  @Param("radius") Double radius,
                                  @Param("cuisineType") String cuisineType,
+                                 @Param("keyword") String keyword,
                                  Pageable pageable);
 }

@@ -41,8 +41,11 @@ public class Restaurant {
     @Column(length = 20)
     private String source;
 
-    @Column(length = 100)
+    @Column(length = 100, unique = true)
     private String externalId;
+
+    @Column(length = 500)
+    private String photoUrl;
 
     @CreationTimestamp
     @Column(nullable = false, updatable = false)

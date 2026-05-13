@@ -1,9 +1,9 @@
 import request from './request'
-import type { Restaurant, RestaurantSearchParams } from '@/types'
+import type { Restaurant, RestaurantSearchParams, PageResponse } from '@/types'
 
 export const restaurantApi = {
   searchNearby(params: RestaurantSearchParams) {
-    return request.get<Restaurant[]>('/restaurants/nearby', { params })
+    return request.get<PageResponse<Restaurant>>('/restaurants/nearby', { params })
   },
 
   getDetail(id: number) {

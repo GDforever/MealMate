@@ -5,21 +5,10 @@ import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import java.util.List;
-
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class AmapPOIResponse {
-
-    private String status;
-    private String info;
-    private String infocode;
-    private List<AmapPOI> pois;
-    private String count;
-
-    public boolean isSuccess() {
-        return "1".equals(status);
-    }
+public class AmapPhoto {
+    private String url;
 }
