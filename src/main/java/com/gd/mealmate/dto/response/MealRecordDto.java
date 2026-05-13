@@ -22,5 +22,7 @@ public class MealRecordDto {
     private LocalDateTime recordedAt;
     private Integer userRating;
     private String tags;
+    private String imageUrl;
+    private String source;
     private LocalDateTime createdAt;
 }

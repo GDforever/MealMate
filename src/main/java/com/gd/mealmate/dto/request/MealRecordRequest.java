@@ -1,6 +1,7 @@
 package com.gd.mealmate.dto.request;
 
 import com.gd.mealmate.model.enums.MealType;
+import com.gd.mealmate.model.enums.RecordSource;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Max;
@@ -30,4 +31,6 @@ public class MealRecordRequest {
     @Max(value = 5, message = "评分最大为5")
     private Integer userRating;
     private String tags;
+    private String imageUrl;
+    private RecordSource source;
 }
