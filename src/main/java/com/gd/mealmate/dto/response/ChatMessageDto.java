@@ -15,5 +15,6 @@ public class ChatMessageDto {
     private Long id;
     private ChatMessageRole role;
     private String content;
+    private String imageUrl;
     private LocalDateTime createdAt;
 }
