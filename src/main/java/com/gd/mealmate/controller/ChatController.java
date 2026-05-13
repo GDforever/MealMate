@@ -1,6 +1,5 @@
 package com.gd.mealmate.controller;
 
-import com.gd.mealmate.dto.request.ChatRequest;
 import com.gd.mealmate.dto.response.ApiResponse;
 import com.gd.mealmate.dto.response.ChatMessageDto;
 import com.gd.mealmate.dto.response.ChatSessionDto;
@@ -8,10 +7,10 @@ import com.gd.mealmate.service.ChatService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
-import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Flux;
 
 import java.util.List;
@@ -25,11 +24,15 @@ public class ChatController {
 
     private final ChatService chatService;
 
-    @PostMapping(produces = MediaType.TEXT_EVENT_STREAM_VALUE)
-    @Operation(summary = "发送消息并流式返回AI回复")
-    public Flux<String> chat(@Valid @RequestBody ChatRequest request) {
-        return chatService.chat(request.getMessage(), request.getSessionId(),
-                request.getLatitude(), request.getLongitude());
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.TEXT_EVENT_STREAM_VALUE)
+    @Operation(summary = "发送消息并流式返回AI回复（支持图片）")
+    public Flux<String> chat(
+            @RequestParam("message") String message,
+            @RequestParam(value = "sessionId", required = false) Long sessionId,
+            @RequestParam(value = "latitude", required = false) Double latitude,
+            @RequestParam(value = "longitude", required = false) Double longitude,
+            @RequestParam(value = "image", required = false) MultipartFile image) {
+        return chatService.chat(message, sessionId, latitude, longitude, image);
     }
 
     @GetMapping("/sessions")

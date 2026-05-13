@@ -1,8 +1,10 @@
 package com.gd.mealmate.service;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.gd.mealmate.dto.request.MealRecordRequest;
 import com.gd.mealmate.dto.response.ChatMessageDto;
 import com.gd.mealmate.dto.response.ChatSessionDto;
+import com.gd.mealmate.dto.response.FoodRecognitionResponse;
 import com.gd.mealmate.exception.BusinessException;
 import com.gd.mealmate.exception.ErrorCode;
 import com.gd.mealmate.mapper.ChatMessageMapper;
@@ -11,10 +13,13 @@ import com.gd.mealmate.model.entity.ChatMessage;
 import com.gd.mealmate.model.entity.ChatSession;
 import com.gd.mealmate.model.entity.User;
 import com.gd.mealmate.model.enums.ChatMessageRole;
+import com.gd.mealmate.model.enums.MealType;
+import com.gd.mealmate.model.enums.RecordSource;
 import com.gd.mealmate.repository.ChatMessageRepository;
 import com.gd.mealmate.repository.ChatSessionRepository;
 import com.gd.mealmate.repository.UserRepository;
 import com.gd.mealmate.security.UserPrincipal;
+import com.gd.mealmate.service.FoodRecognitionService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.ai.chat.messages.AssistantMessage;
@@ -28,6 +33,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import reactor.core.publisher.Flux;
 
 import java.time.LocalDateTime;
@@ -53,6 +59,8 @@ public class ChatService {
     private final ObjectMapper objectMapper;
     private final EmbeddingService embeddingService;
     private final KnowledgeBaseService knowledgeBaseService;
+    private final FoodRecognitionService foodRecognitionService;
+    private final MealRecordService mealRecordService;
 
     @Value("${app.knowledge.top-k:5}")
     private int knowledgeTopK;
@@ -109,20 +117,57 @@ public class ChatService {
         """;
 
     @Transactional
-    public Flux<String> chat(String userMessage, Long sessionId, Double latitude, Double longitude) {
+    public Flux<String> chat(String userMessage, Long sessionId, Double latitude, Double longitude, MultipartFile image) {
         User currentUser = getCurrentUser();
 
         ChatSession session = getOrCreateSession(sessionId, currentUser);
+
+        // Handle image recognition if present
+        String recognitionContext = null;
+        String imageUrl = null;
+        if (image != null && !image.isEmpty()) {
+            try {
+                FoodRecognitionResponse recognition = foodRecognitionService.recognizeForChat(image, currentUser.getId());
+                imageUrl = recognition.getImageUrl();
+                if (recognition.getFoodName() != null && !recognition.getFoodName().isBlank()) {
+                    recognitionContext = "用户上传了一张食物照片，已识别为「" + recognition.getFoodName()
+                            + "」，估算热量约" + recognition.getCalories() + "kcal。";
+
+                    // Auto-create meal record
+                    MealType mealType = inferMealTypeFromTime();
+                    MealRecordRequest recordRequest = new MealRecordRequest();
+                    recordRequest.setUserId(currentUser.getId());
+                    recordRequest.setMealType(mealType);
+                    recordRequest.setFoodName(recognition.getFoodName());
+                    recordRequest.setRecordedAt(LocalDateTime.now());
+                    recordRequest.setTags(recognition.getCalories() != null ? "热量约" + recognition.getCalories() + "kcal" : null);
+                    recordRequest.setImageUrl(imageUrl);
+                    recordRequest.setSource(RecordSource.PHOTO);
+
+                    mealRecordService.createMealRecord(currentUser.getId(), recordRequest);
+                    recognitionContext += "已自动记录为" + mealType.getDescription() + "。";
+                }
+            } catch (Exception e) {
+                log.warn("Food recognition failed for chat image: {}", e.getMessage());
+                recognitionContext = "用户上传了一张食物照片，但识别失败。";
+            }
+        }
 
         // Save user message
         ChatMessage userMsg = new ChatMessage();
         userMsg.setSession(session);
         userMsg.setRole(ChatMessageRole.USER);
-        userMsg.setContent(userMessage);
+        String displayContent = image != null && !image.isEmpty() ? "[图片] " + userMessage : userMessage;
+        userMsg.setContent(displayContent);
+        userMsg.setImageUrl(imageUrl);
         messageRepository.save(userMsg);
 
         // Build system prompt with user context
         String systemContent = buildSystemPrompt(currentUser, latitude, longitude, userMessage);
+        if (recognitionContext != null) {
+            systemContent += "\n\n## 图片识别结果\n" + recognitionContext
+                    + "\n\n**重要**：请在回复中告知用户识别结果和记录情况。如果用户说这是早餐/午餐/晚餐，请帮用户修改记录的餐次。";
+        }
         SystemMessage systemMessage = new SystemMessage(systemContent);
 
         // Build message history (already includes the just-saved user message)
@@ -345,5 +390,13 @@ public class ChatService {
                 .id(principal.getUserId())
                 .username(principal.getUsername())
                 .build();
+    }
+
+    private MealType inferMealTypeFromTime() {
+        int hour = LocalDateTime.now().getHour();
+        if (hour >= 6 && hour < 9) return MealType.BREAKFAST;
+        if (hour >= 11 && hour < 14) return MealType.LUNCH;
+        if (hour >= 17 && hour < 20) return MealType.DINNER;
+        return MealType.SNACK;
     }
 }
