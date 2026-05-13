@@ -1,10 +1,13 @@
 package com.gd.mealmate.controller;
 
+import com.gd.mealmate.dto.request.FoodRecognitionRequest;
 import com.gd.mealmate.dto.request.MealRecordRequest;
 import com.gd.mealmate.dto.response.ApiResponse;
+import com.gd.mealmate.dto.response.FoodRecognitionResponse;
 import com.gd.mealmate.dto.response.MealRecordDto;
 import com.gd.mealmate.model.enums.MealType;
 import com.gd.mealmate.security.UserPrincipal;
+import com.gd.mealmate.service.FoodRecognitionService;
 import com.gd.mealmate.service.MealRecordService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -16,8 +19,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.MediaType;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -30,6 +35,7 @@ import java.time.LocalDateTime;
 public class MealRecordController {
 
     private final MealRecordService mealRecordService;
+    private final FoodRecognitionService foodRecognitionService;
 
     @PostMapping
     @Operation(summary = "Create meal record", description = "Creates a new meal record for the authenticated user")
@@ -39,6 +45,17 @@ public class MealRecordController {
         Long userId = userPrincipal.getUserId();
         MealRecordDto mealRecord = mealRecordService.createMealRecord(userId, request);
         return ApiResponse.success(mealRecord);
+    }
+
+    @PostMapping(value = "/recognize", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @Operation(summary = "Recognize food from photo", description = "Uploads a food photo, recognizes the dish, and auto-creates a meal record")
+    public ApiResponse<FoodRecognitionResponse> recognizeFood(
+            @AuthenticationPrincipal UserPrincipal userPrincipal,
+            @RequestParam("image") MultipartFile image,
+            @Valid FoodRecognitionRequest request) {
+        Long userId = userPrincipal.getUserId();
+        FoodRecognitionResponse response = foodRecognitionService.recognize(image, request.getMealType(), userId);
+        return ApiResponse.success(response);
     }
 
     @GetMapping
