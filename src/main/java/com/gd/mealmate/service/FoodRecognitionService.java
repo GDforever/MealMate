@@ -139,16 +139,17 @@ public class FoodRecognitionService {
             Path dirPath = Path.of(uploadDir, "food", String.valueOf(userId));
             Files.createDirectories(dirPath);
 
-            String originalFilename = image.getOriginalFilename();
-            String extension = ".jpg";
-            if (originalFilename != null && originalFilename.contains(".")) {
-                extension = originalFilename.substring(originalFilename.lastIndexOf("."));
-            }
+            String contentType = image.getContentType();
+            String extension = switch (contentType != null ? contentType : "image/jpeg") {
+                case "image/png" -> ".png";
+                case "image/webp" -> ".webp";
+                default -> ".jpg";
+            };
             String filename = UUID.randomUUID() + extension;
             Path filePath = dirPath.resolve(filename);
             image.transferTo(filePath.toFile());
 
-            return filePath.toString();
+            return "/api/images/food/" + userId + "/" + filename;
         } catch (IOException e) {
             log.error("Failed to save image: {}", e.getMessage());
             throw new BusinessException(ErrorCode.IMAGE_RECOGNITION_FAILED, "图片保存失败");

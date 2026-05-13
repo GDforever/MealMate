@@ -50,6 +50,7 @@
 <script setup lang="ts">
 import { ref, computed } from 'vue'
 import { Promotion, PictureFilled, Close } from '@element-plus/icons-vue'
+import { ElMessage } from 'element-plus'
 
 const props = defineProps<{
   disabled?: boolean
@@ -87,6 +88,7 @@ const handleFileSelect = (e: Event) => {
   if (!file) return
 
   if (file.size > 10 * 1024 * 1024) {
+    ElMessage.error('图片不能超过10MB')
     return
   }
 
