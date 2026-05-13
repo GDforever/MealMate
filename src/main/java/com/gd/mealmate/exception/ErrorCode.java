@@ -26,7 +26,12 @@ public enum ErrorCode {
     KNOWLEDGE_BASE_ACCESS_DENIED(40503, "无权访问该知识库"),
     UNSUPPORTED_FILE_TYPE(40504, "不支持的文件类型"),
     FILE_PARSE_ERROR(40505, "文件解析失败"),
-    EMBEDDING_ERROR(50004, "向量嵌入生成失败");
+    EMBEDDING_ERROR(50004, "向量嵌入生成失败"),
+
+    // Food Recognition errors
+    IMAGE_RECOGNITION_FAILED(40601, "食物识别失败"),
+    IMAGE_TOO_LARGE(40602, "图片文件过大"),
+    UNSUPPORTED_IMAGE_TYPE(40603, "不支持的图片格式");
 
     private final int code;
     private final String message;

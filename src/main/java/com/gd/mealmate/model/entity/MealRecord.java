@@ -1,6 +1,7 @@
 package com.gd.mealmate.model.entity;
 
 import com.gd.mealmate.model.enums.MealType;
+import com.gd.mealmate.model.enums.RecordSource;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -48,6 +49,13 @@ public class MealRecord {
 
     @Column(length = 1000)
     private String tags;
+
+    @Column(length = 500)
+    private String imageUrl;
+
+    @Enumerated(EnumType.STRING)
+    @Column(length = 20)
+    private RecordSource source;
 
     @CreationTimestamp
     @Column(nullable = false, updatable = false)
