@@ -3,7 +3,10 @@
   <div class="meal-list-view">
     <div class="page-header">
       <h2>用餐记录</h2>
-      <el-button type="primary" :icon="Plus" @click="showCreateDialog">添加记录</el-button>
+      <div class="header-actions">
+        <el-button :icon="Camera" @click="router.push('/meals/photo')">拍照记录</el-button>
+        <el-button type="primary" :icon="Plus" @click="showCreateDialog">添加记录</el-button>
+      </div>
     </div>
 
     <div class="filter-bar">
@@ -63,7 +66,8 @@
 
 <script setup lang="ts">
 import { ref, computed, onMounted } from 'vue'
-import { Plus, Refresh } from '@element-plus/icons-vue'
+import { Camera, Plus, Refresh } from '@element-plus/icons-vue'
+import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import MealCard from '@/components/meal/MealCard.vue'
 import MealForm from '@/components/meal/MealForm.vue'
@@ -71,6 +75,7 @@ import { useMealStore } from '@/stores/meal'
 import type { MealRecord, MealRecordRequest } from '@/types'
 
 const mealStore = useMealStore()
+const router = useRouter()
 
 const loading = ref(false)
 const submitting = ref(false)
@@ -171,6 +176,11 @@ const handleSubmit = async (data: MealRecordRequest) => {
   h2 {
     margin: 0;
   }
+}
+
+.header-actions {
+  display: flex;
+  gap: 8px;
 }
 
 .filter-bar {

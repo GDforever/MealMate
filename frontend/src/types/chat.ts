@@ -11,6 +11,7 @@ export interface ChatMessage {
   role: 'USER' | 'ASSISTANT' | 'SYSTEM'
   content: string
   createdAt: string
+  imageUrl?: string
   options?: string[]
 }
 
@@ -36,6 +37,7 @@ export interface ChatMessageDto {
   role: 'USER' | 'ASSISTANT' | 'SYSTEM'
   content: string
   createdAt: string
+  imageUrl?: string
 }
 
 export interface SSEMessage {

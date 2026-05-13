@@ -42,13 +42,14 @@ export const useChatStore = defineStore('chat', () => {
     messages.value.set(sessionId, Array.isArray(data) ? data : data.messages || [])
   }
 
-  const addUserMessage = (content: string) => {
+  const addUserMessage = (content: string, imageUrl?: string) => {
     const msg: ChatMessage = {
       id: Date.now(),
       sessionId: currentSessionId.value || -1,
       role: 'USER',
       content,
-      createdAt: new Date().toISOString()
+      createdAt: new Date().toISOString(),
+      imageUrl
     }
 
     const sessionMessages = messages.value.get(currentSessionId.value || -1) || []

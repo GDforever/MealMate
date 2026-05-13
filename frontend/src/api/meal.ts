@@ -1,5 +1,5 @@
 import request from './request'
-import type { MealRecord, MealRecordRequest, MealFilters, PageResponse } from '@/types'
+import type { MealRecord, MealRecordRequest, MealFilters, PageResponse, FoodRecognitionResponse } from '@/types'
 
 export const mealApi = {
   getRecords(params: { page: number; size: number; startDate?: string; endDate?: string; mealType?: string }) {
@@ -20,5 +20,14 @@ export const mealApi = {
 
   deleteRecord(id: number) {
     return request.delete(`/meal-records/${id}`)
+  },
+
+  recognizeFood(image: File, mealType: string): Promise<FoodRecognitionResponse> {
+    const formData = new FormData()
+    formData.append('image', image)
+    formData.append('mealType', mealType)
+    return request.post('/meal-records/recognize', formData, {
+      headers: { 'Content-Type': 'multipart/form-data' }
+    })
   }
 }

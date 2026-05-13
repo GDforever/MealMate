@@ -48,6 +48,12 @@ const routes: RouteRecordRaw[] = [
         meta: { title: '数据统计' }
       },
       {
+        path: 'meals/photo',
+        name: 'FoodCamera',
+        component: () => import('@/views/meal/FoodCameraView.vue'),
+        meta: { title: '拍照记录' }
+      },
+      {
         path: 'restaurants',
         name: 'RestaurantList',
         component: () => import('@/views/restaurant/RestaurantListView.vue'),

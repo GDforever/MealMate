@@ -21,6 +21,7 @@
           :role="message.role"
           :content="message.content"
           :created-at="message.createdAt"
+          :image-url="message.imageUrl"
           :options="message.options"
           @select-option="handleSelectOption"
         />
@@ -92,8 +93,8 @@ const handleDeleteSession = async (sessionId: number) => {
   ElMessage.success('对话已删除')
 }
 
-const handleSendMessage = async (message: string) => {
-  await sendMessage(message)
+const handleSendMessage = async (message: string, image?: File) => {
+  await sendMessage(message, image)
 }
 
 const handleSelectOption = async (option: string) => {

@@ -13,6 +13,8 @@ export interface MealRecord {
   userRating?: number
   tags?: string
   createdAt: string
+  imageUrl?: string
+  source?: string
 }
 
 export interface MealRecordRequest {
@@ -25,6 +27,8 @@ export interface MealRecordRequest {
   recordedAt: string
   userRating?: number
   tags?: string
+  imageUrl?: string
+  source?: string
 }
 
 export interface MealFilters {
@@ -38,4 +42,13 @@ export interface MealStats {
   totalCalories: number
   avgCalories: number
   byType: Record<MealType, number>
+}
+
+export interface FoodRecognitionResponse {
+  foodName: string
+  calories: number
+  confidence: number
+  mealRecordId?: number
+  imageUrl?: string
+  message: string
 }

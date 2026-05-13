@@ -10,6 +10,9 @@
         <span class="message-role">{{ role === 'USER' ? '你' : 'AI 助手' }}</span>
         <span class="message-time">{{ formattedTime }}</span>
       </div>
+      <div v-if="imageUrl" class="message-image">
+        <img :src="getImageUrl(imageUrl)" alt="上传的图片" />
+      </div>
       <div class="message-text" v-html="renderedContent"></div>
       <div v-if="options && options.length > 0" class="message-options">
         <div
@@ -35,6 +38,7 @@ const props = defineProps<{
   role: 'USER' | 'ASSISTANT' | 'SYSTEM'
   content: string
   createdAt?: string
+  imageUrl?: string
   options?: string[]
 }>()
 
@@ -51,6 +55,11 @@ const formattedTime = computed(() => {
 const renderedContent = computed(() => {
   return md.render(props.content)
 })
+
+const getImageUrl = (url: string) => {
+  if (url.startsWith('http') || url.startsWith('data:')) return url
+  return `/api/images/${encodeURIComponent(url)}`
+}
 </script>
 
 <style scoped lang="scss">
@@ -126,6 +135,18 @@ const renderedContent = computed(() => {
     border-radius: 8px;
     overflow-x: auto;
     margin: 8px 0;
+  }
+}
+
+.message-image {
+  margin-bottom: 8px;
+
+  img {
+    max-width: 100%;
+    max-height: 300px;
+    border-radius: 8px;
+    cursor: pointer;
+    object-fit: cover;
   }
 }
 

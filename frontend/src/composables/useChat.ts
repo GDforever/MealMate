@@ -32,8 +32,8 @@ export function useChat() {
     await chatStore.fetchSessionMessages(sessionId)
   }
 
-  const sendMessage = async (message: string) => {
-    chatStore.addUserMessage(message)
+  const sendMessage = async (message: string, image?: File) => {
+    chatStore.addUserMessage(message, image ? URL.createObjectURL(image) : undefined)
     chatStore.setLoading(true)
 
     // Try to get user location
@@ -49,7 +49,9 @@ export function useChat() {
       // Location not available, continue without it
     }
 
-    const responsePromise = Promise.resolve(chatApi.sendMessage(message, chatStore.currentSessionId, location))
+    const responsePromise = Promise.resolve(
+      chatApi.sendMessage(message, chatStore.currentSessionId, location, image || null)
+    )
 
     // Fire-and-forget: connect manages its own lifecycle via callbacks.
     // Do NOT await — if the SSE stream never closes, await would block forever.
