@@ -109,7 +109,7 @@ const formData = reactive<MealRecordRequest>({
   longitude: props.record?.longitude,
   recordedAt: props.record?.recordedAt || new Date().toISOString().slice(0, 19).replace('T', ' '),
   userRating: props.record?.userRating,
-  tags: props.record?.tags || []
+  tags: props.record?.tags ? props.record.tags.split(',').map(t => t.trim()).filter(Boolean) : []
 })
 
 const commonTags = ['辣', '清淡', '素食', '高蛋白', '低碳水', '快餐', '火锅', '烧烤', '日料', '西餐']
@@ -124,7 +124,8 @@ const handleSubmit = async () => {
   if (!formRef.value) return
   await formRef.value.validate((valid) => {
     if (valid) {
-      emit('submit', formData)
+      const data = { ...formData, tags: formData.tags?.join(',') || '' }
+      emit('submit', data)
     }
   })
 }

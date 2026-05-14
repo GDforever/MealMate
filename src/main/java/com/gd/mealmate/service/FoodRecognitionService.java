@@ -20,6 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -35,14 +36,17 @@ public class FoodRecognitionService {
     @Value("${app.upload.dir:./uploads}")
     private String uploadDir;
 
-    @Value("${spring.ai.openai.base-url}")
-    private String aiBaseUrl;
+    @Value("${app.vision.base-url}")
+    private String visionBaseUrl;
 
-    @Value("${spring.ai.openai.api-key}")
-    private String aiApiKey;
+    @Value("${app.vision.api-key}")
+    private String visionApiKey;
 
-    @Value("${spring.ai.openai.chat.options.model:deepseek-chat}")
+    @Value("${app.vision.model}")
     private String visionModel;
+
+    @Value("${app.vision.max-tokens:2048}")
+    private int visionMaxTokens;
 
     private static final long MAX_IMAGE_SIZE = 10 * 1024 * 1024;
     private static final Set<String> ALLOWED_TYPES = Set.of("image/jpeg", "image/png", "image/webp");
@@ -63,21 +67,31 @@ public class FoodRecognitionService {
         """;
 
     public FoodRecognitionResponse recognize(MultipartFile image, MealType mealType, Long userId) {
+        log.info("[recognize] 开始识别: userId={}, mealType={}, imageSize={}, contentType={}",
+                userId, mealType, image != null ? image.getSize() : 0, image != null ? image.getContentType() : "null");
         validateImage(image);
 
-        String imageUrl = saveImage(image, userId);
-        String base64Image;
+        byte[] imageBytes;
         try {
-            base64Image = Base64.getEncoder().encodeToString(image.getBytes());
+            imageBytes = image.getBytes();
         } catch (IOException e) {
             throw new BusinessException(ErrorCode.IMAGE_RECOGNITION_FAILED, "图片读取失败");
         }
 
+        String imageUrl = saveImage(image, userId);
+        log.info("[recognize] 图片已保存: {}", imageUrl);
+
+        String base64Image = Base64.getEncoder().encodeToString(imageBytes);
         String contentType = image.getContentType();
         String dataUrl = "data:" + contentType + ";base64," + base64Image;
+        log.info("[recognize] base64编码长度: {}", base64Image.length());
 
         String aiResponse = callVisionApi(dataUrl);
+        log.info("[recognize] AI原始响应: {}", aiResponse);
+
         FoodRecognitionResponse result = parseResponse(aiResponse);
+        log.info("[recognize] 解析结果: foodName={}, calories={}, confidence={}",
+                result.getFoodName(), result.getCalories(), result.getConfidence());
         result.setImageUrl(imageUrl);
 
         if (result.getConfidence() != null && result.getConfidence() >= 0.5) {
@@ -103,13 +117,15 @@ public class FoodRecognitionService {
     public FoodRecognitionResponse recognizeForChat(MultipartFile image, Long userId) {
         validateImage(image);
 
-        String imageUrl = saveImage(image, userId);
-        String base64Image;
+        byte[] imageBytes;
         try {
-            base64Image = Base64.getEncoder().encodeToString(image.getBytes());
+            imageBytes = image.getBytes();
         } catch (IOException e) {
             throw new BusinessException(ErrorCode.IMAGE_RECOGNITION_FAILED, "图片读取失败");
         }
+
+        String imageUrl = saveImage(image, userId);
+        String base64Image = Base64.getEncoder().encodeToString(imageBytes);
 
         String contentType = image.getContentType();
         String dataUrl = "data:" + contentType + ";base64," + base64Image;
@@ -136,7 +152,8 @@ public class FoodRecognitionService {
 
     private String saveImage(MultipartFile image, Long userId) {
         try {
-            Path dirPath = Path.of(uploadDir, "food", String.valueOf(userId));
+            Path basePath = Paths.get(uploadDir).toAbsolutePath().normalize();
+            Path dirPath = basePath.resolve("food").resolve(String.valueOf(userId));
             Files.createDirectories(dirPath);
 
             String contentType = image.getContentType();
@@ -157,11 +174,11 @@ public class FoodRecognitionService {
     }
 
     private String callVisionApi(String base64DataUrl) {
-        String url = aiBaseUrl + "/chat/completions";
+        String url = visionBaseUrl + "/chat/completions";
 
         HttpHeaders headers = new HttpHeaders();
         headers.setContentType(MediaType.APPLICATION_JSON);
-        headers.setBearerAuth(aiApiKey);
+        headers.setBearerAuth(visionApiKey);
 
         Map<String, Object> textContent = Map.of("type", "text", "text", RECOGNITION_PROMPT);
         Map<String, Object> imageUrlContent = Map.of(
@@ -177,13 +194,17 @@ public class FoodRecognitionService {
         Map<String, Object> requestBody = Map.of(
                 "model", visionModel,
                 "messages", List.of(userMessage),
-                "max_tokens", 500
+                "max_tokens", visionMaxTokens
         );
 
         HttpEntity<Map<String, Object>> entity = new HttpEntity<>(requestBody, headers);
 
         try {
+            log.info("[callVisionApi] 请求URL: {}, model: {}", url, visionModel);
+            log.info("[callVisionApi] 开始调用API...");
             ResponseEntity<String> response = restTemplate.exchange(url, HttpMethod.POST, entity, String.class);
+            log.info("[callVisionApi] 响应状态: {}, body长度: {}", response.getStatusCode(), response.getBody() != null ? response.getBody().length() : 0);
+            log.debug("[callVisionApi] 响应body: {}", response.getBody());
             if (response.getStatusCode().is2xxSuccessful() && response.getBody() != null) {
                 JsonNode root = objectMapper.readTree(response.getBody());
                 return root.path("choices").path(0).path("message").path("content").asText();
@@ -199,6 +220,7 @@ public class FoodRecognitionService {
 
     private FoodRecognitionResponse parseResponse(String aiResponse) {
         try {
+            log.info("[parseResponse] 输入: {}", aiResponse);
             String json = aiResponse.trim();
             if (json.contains("```")) {
                 int start = json.indexOf("```");

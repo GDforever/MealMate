@@ -71,6 +71,11 @@ chat:
 app:
   upload:
     dir: ${UPLOAD_DIR:./uploads}
+  vision:
+    base-url: ${VISION_BASE_URL:https://api.siliconflow.cn/v1}
+    api-key: ${VISION_API_KEY:your-vision-api-key}
+    model: ${VISION_MODEL:deepseek-ai/deepseek-vl2}
+    max-tokens: ${VISION_MAX_TOKENS:2048}
   knowledge:
     chunk-size: 100
     chunk-overlap: 50

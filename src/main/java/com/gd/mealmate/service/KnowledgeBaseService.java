@@ -31,6 +31,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 
 @Service
@@ -140,7 +141,7 @@ public class KnowledgeBaseService {
 
         DocumentContentType contentType = resolveContentType(file.getOriginalFilename());
 
-        Path dirPath = Path.of(uploadDir, "knowledge", String.valueOf(kbId));
+        Path dirPath = Paths.get(uploadDir).toAbsolutePath().normalize().resolve("knowledge").resolve(String.valueOf(kbId));
         try {
             Files.createDirectories(dirPath);
         } catch (IOException e) {

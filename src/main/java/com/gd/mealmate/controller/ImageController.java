@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 
 @RestController
 @RequestMapping("/api/images")
@@ -30,9 +31,10 @@ public class ImageController {
     public ResponseEntity<Resource> getFoodImage(
             @PathVariable Long userId,
             @PathVariable String filename) {
-        Path filePath = Path.of(uploadDir, "food", String.valueOf(userId), filename).normalize();
+        Path basePath = Paths.get(uploadDir).toAbsolutePath().normalize();
+        Path filePath = basePath.resolve("food").resolve(String.valueOf(userId)).resolve(filename).normalize();
 
-        if (!filePath.startsWith(Path.of(uploadDir).normalize())) {
+        if (!filePath.startsWith(basePath)) {
             throw new BusinessException(ErrorCode.RESOURCE_NOT_FOUND);
         }
 

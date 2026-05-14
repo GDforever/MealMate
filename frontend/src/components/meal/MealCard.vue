@@ -10,9 +10,9 @@
       <el-icon><Shop /></el-icon>
       {{ record.restaurantName }}
     </p>
-    <div v-if="record.tags?.length" class="meal-tags">
+    <div v-if="tagList.length" class="meal-tags">
       <el-tag
-        v-for="tag in record.tags"
+        v-for="tag in tagList"
         :key="tag"
         size="small"
         class="tag-item"
@@ -79,6 +79,11 @@ const mealTypeColor = computed(() => {
 
 const formattedTime = computed(() => {
   return formatDate(props.record.recordedAt, 'MM-DD HH:mm')
+})
+
+const tagList = computed(() => {
+  if (!props.record.tags) return []
+  return props.record.tags.split(',').map(t => t.trim()).filter(Boolean)
 })
 
 const handleEdit = () => {

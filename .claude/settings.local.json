@@ -48,7 +48,8 @@
       "Bash(size=10 2>&1)",
       "Bash(PGPASSWORD=your-password psql *)",
       "Bash(xargs grep *)",
-      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\('count:', d.get\\('count'\\), 'pois:', len\\(d.get\\('pois',[]\\)\\)\\)\")"
+      "Bash(python3 -c \"import sys,json; d=json.load\\(sys.stdin\\); print\\('count:', d.get\\('count'\\), 'pois:', len\\(d.get\\('pois',[]\\)\\)\\)\")",
+      "Bash(bash *)"
     ]
   }
 }
